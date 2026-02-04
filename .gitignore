@@ -1,0 +1,33 @@
+# เฉพาะไฟล์ชั่วคราวและ system files
+~$*.xlsx
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# OS specific
+.Spotlight-V100
+.Trashes
+ehthumbs.db

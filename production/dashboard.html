@@ -1,0 +1,1873 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title> Dashboard - ติดตาม S/O | PD3 Production</title>
+    <script src="https://cdn.tailwindcss.com/3.4.10"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Apple-inspired Theme (เหมือนกับ pd3_production_v3.html) */
+        :root {
+            --apple-bg: #f5f5f7;
+            --apple-card: #ffffff;
+            --apple-text: #1d1d1f;
+            --apple-text-secondary: #86868b;
+            --apple-blue: #0071e3;
+            --apple-blue-hover: #0077ed;
+            --apple-green: #34c759;
+            --apple-orange: #ff9500;
+            --apple-red: #ff3b30;
+            --apple-purple: #af52de;
+            --apple-border: #d2d2d7;
+            --apple-shadow: rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            font-family: 'Kanit', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background-color: var(--apple-bg);
+            color: var(--apple-text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Card Style */
+        .apple-card {
+            background: var(--apple-card);
+            border-radius: 18px;
+            box-shadow: 0 2px 8px var(--apple-shadow), 0 8px 24px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        .apple-card:hover {
+            box-shadow: 0 4px 12px var(--apple-shadow), 0 12px 32px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        /* Header */
+        .apple-header {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        /* KPI Card */
+        .kpi-card {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .kpi-value {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1;
+            margin: 0.5rem 0;
+        }
+
+        .kpi-label {
+            font-size: 0.875rem;
+            color: var(--apple-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Select Style */
+        .apple-select {
+            background: #ffffff;
+            border: 1.5px solid #d2d2d7;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 16px;
+            color: var(--apple-text);
+            transition: all 0.2s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%231d1d1f' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 45px;
+        }
+
+        .apple-select:focus {
+            outline: none;
+            border-color: var(--apple-blue);
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+        }
+
+        /* S/O Selector (Employee Style) */
+        .so-selector-container {
+            display: flex;
+            gap: 12px;
+            align-items: stretch;
+        }
+
+        .so-select-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .so-select-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--apple-text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .so-manual-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--apple-border);
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+        }
+
+        .so-manual-input:focus {
+            outline: none;
+            border-color: var(--apple-blue);
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+        }
+
+        .so-add-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--apple-blue), #0051a8);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+            align-self: flex-end;
+        }
+
+        .so-add-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 113, 227, 0.4);
+        }
+
+        .so-add-button:active {
+            transform: translateY(0);
+        }
+
+        /* Enhanced Progress Bar */
+        .progress-container {
+            background: linear-gradient(90deg, #e5e5ea, #f0f0f5);
+            border-radius: 16px;
+            height: 20px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #0071e3, #00c853, #0071e3);
+            background-size: 200% 100%;
+            height: 100%;
+            border-radius: 16px;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 12px rgba(0, 113, 227, 0.4);
+            position: relative;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.3), 
+                transparent);
+            animation: slide 2s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes slide {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-percentage {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--apple-blue), var(--apple-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Gauge Chart Container */
+        .gauge-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto 40px;
+            padding: 40px;
+            background: linear-gradient(145deg, #ffffff 0%, #f5f7fa 50%, #ffffff 100%);
+            border-radius: 24px;
+            box-shadow: 
+                /* Main shadow - 3D depth */
+                0 20px 60px rgba(0, 0, 0, 0.12),
+                0 8px 24px rgba(0, 0, 0, 0.08),
+                /* Highlight on top */
+                inset 0 2px 4px rgba(255, 255, 255, 0.9),
+                /* Inner glow */
+                inset 0 -2px 4px rgba(0, 0, 0, 0.03),
+                /* Colored accent shadow */
+                0 4px 20px rgba(0, 113, 227, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            transform: translateZ(0);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gauge-container:hover {
+            transform: translateY(-4px) translateZ(0);
+            box-shadow: 
+                0 24px 80px rgba(0, 0, 0, 0.15),
+                0 12px 32px rgba(0, 0, 0, 0.1),
+                inset 0 2px 4px rgba(255, 255, 255, 0.9),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.03),
+                0 8px 30px rgba(0, 113, 227, 0.12);
+        }
+
+        .gauge-container::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            border-radius: 24px;
+            background: linear-gradient(
+                145deg,
+                rgba(0, 113, 227, 0.4),
+                rgba(52, 199, 89, 0.2),
+                rgba(0, 113, 227, 0.3)
+            );
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: -1;
+            filter: blur(8px);
+        }
+
+        .gauge-container:hover::before {
+            opacity: 0.6;
+        }
+
+        .gauge-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 24px;
+            background: linear-gradient(
+                to bottom,
+                rgba(255, 255, 255, 0.8) 0%,
+                rgba(255, 255, 255, 0) 50%,
+                rgba(0, 0, 0, 0.02) 100%
+            );
+            pointer-events: none;
+        }
+
+        .gauge-wrapper {
+            position: relative;
+            z-index: 1;
+            padding: 20px;
+            background: radial-gradient(
+                circle at center,
+                rgba(0, 113, 227, 0.03) 0%,
+                transparent 70%
+            );
+            border-radius: 20px;
+        }
+
+        .gauge-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            padding-top: 24px;
+            border-top: 2px solid transparent;
+            background: 
+                linear-gradient(#fff, #fff) padding-box,
+                linear-gradient(90deg, 
+                    rgba(0, 113, 227, 0.2), 
+                    rgba(52, 199, 89, 0.2), 
+                    rgba(0, 113, 227, 0.2)
+                ) border-box;
+            border-image-slice: 1;
+            border-width: 2px 0 0 0;
+            border-style: solid;
+            border-image-source: linear-gradient(90deg, 
+                rgba(0, 113, 227, 0.2), 
+                rgba(52, 199, 89, 0.2), 
+                rgba(0, 113, 227, 0.2)
+            );
+        }
+
+        .gauge-stat {
+            text-align: center;
+            flex: 1;
+            padding: 8px 12px;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .gauge-stat:hover {
+            transform: translateY(-2px);
+        }
+
+        .gauge-stat:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: 30px;
+            background: linear-gradient(
+                to bottom,
+                transparent,
+                rgba(0, 113, 227, 0.2),
+                transparent
+            );
+        }
+
+        .gauge-stat-value {
+            font-size: 26px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #0071e3, #00a8ff, #34c759);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            filter: drop-shadow(0 2px 4px rgba(0, 113, 227, 0.1));
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .gauge-stat-label {
+            font-size: 11px;
+            color: #86868b;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 600;
+            opacity: 0.8;
+        }
+
+        .gauge-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 45%;
+            background: linear-gradient(180deg, #ff3b30, #ff6b6b);
+            transform-origin: 50% 100%;
+            border-radius: 2px 2px 0 0;
+            box-shadow: 0 2px 8px rgba(255, 59, 48, 0.4);
+            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+        }
+
+        .gauge-center-dot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #ff3b30, #ff6b6b);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 
+                0 2px 8px rgba(255, 59, 48, 0.3),
+                inset 0 1px 2px rgba(255, 255, 255, 0.3);
+            z-index: 11;
+        }
+
+        /* Bar Chart Styles */
+        .bar-chart-container {
+            position: relative;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #fafbfc 0%, #ffffff 100%);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 
+                inset 0 2px 4px rgba(0, 0, 0, 0.03),
+                0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .chart-view-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #86868b;
+            background: #f5f5f7;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .chart-view-btn:hover {
+            background: #e8e8ed;
+            transform: translateY(-1px);
+        }
+
+        .chart-view-btn.active {
+            color: #ffffff;
+            background: linear-gradient(135deg, #0071e3, #0077ed);
+            border-color: rgba(0, 113, 227, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.25);
+        }
+
+        .chart-view-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(0, 113, 227, 0.03), rgba(52, 199, 89, 0.03));
+            border-radius: 12px;
+            border: 1px solid rgba(0, 113, 227, 0.08);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .legend-item:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .legend-label {
+            color: #1d1d1f;
+        }
+
+        .legend-value {
+            color: #86868b;
+            margin-left: 4px;
+        }
+
+        @keyframes barGrow {
+            from {
+                transform: scaleY(0);
+                opacity: 0;
+            }
+            to {
+                transform: scaleY(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Autocomplete Dropdown Styling */
+        .autocomplete-container {
+            position: relative;
+        }
+
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1.5px solid var(--apple-border);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08);
+            max-height: 280px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 1000;
+            margin-top: 8px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .autocomplete-suggestions.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        /* Custom Scrollbar for Autocomplete */
+        .autocomplete-suggestions::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .autocomplete-suggestions::-webkit-scrollbar-track {
+            background: #f5f5f5;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .autocomplete-suggestions::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #d1d1d6, #a1a1a6);
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        .autocomplete-suggestions::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #a1a1a6, #8e8e93);
+        }
+
+        .autocomplete-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 15px;
+            color: var(--apple-text);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover {
+            background: linear-gradient(90deg, rgba(0, 113, 227, 0.08), rgba(0, 113, 227, 0.04));
+            padding-left: 20px;
+            transform: translateX(2px);
+        }
+
+        .autocomplete-item.active {
+            background: linear-gradient(90deg, rgba(0, 113, 227, 0.12), rgba(0, 113, 227, 0.06));
+            color: var(--apple-blue);
+            font-weight: 500;
+            border-left: 3px solid var(--apple-blue);
+        }
+
+        .autocomplete-item mark {
+            background: linear-gradient(120deg, #ffeb3b 0%, #ffc107 100%);
+            color: #000;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+            box-shadow: 0 1px 2px rgba(255, 193, 7, 0.3);
+            margin: 0;
+        }
+
+        .autocomplete-no-results {
+            padding: 20px;
+            text-align: center;
+            color: var(--apple-text-secondary);
+            font-size: 14px;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 113, 227, 0.1);
+            border-top-color: var(--apple-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        .loading-spinner.active {
+            display: block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Table Style */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: var(--apple-bg);
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--apple-text-secondary);
+            border-bottom: 2px solid var(--apple-border);
+        }
+
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--apple-border);
+        }
+
+        .data-table tr:hover {
+            background: var(--apple-bg);
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-shift-a {
+            background: rgba(0, 113, 227, 0.1);
+            color: var(--apple-blue);
+        }
+
+        .badge-shift-b {
+            background: rgba(255, 149, 0, 0.1);
+            color: var(--apple-orange);
+        }
+
+        /* Reset Button Style */
+        .reset-search-btn {
+            width: 42px;
+            height: 42px;
+            background: rgba(220, 38, 38, 0.9);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+            align-self: flex-end;
+        }
+
+        .reset-search-btn:hover {
+            background: rgba(220, 38, 38, 1);
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+        }
+
+        .reset-search-btn:active {
+            transform: scale(0.95);
+        }
+
+        .reset-search-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Search Button Enhancement */
+        .search-btn {
+            align-self: flex-end;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--apple-blue), #0051a8);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 113, 227, 0.4);
+        }
+
+        .search-btn:active {
+            transform: translateY(0);
+        }
+
+        .search-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Reset Button Style */
+        .reset-search-btn {
+            width: 48px;
+            height: 48px;
+            background: rgba(220, 38, 38, 0.9);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+        }
+
+        .reset-search-btn:hover {
+            background: rgba(220, 38, 38, 1);
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+        }
+
+        .reset-search-btn:active {
+            transform: scale(0.95);
+        }
+
+        .reset-search-btn svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--apple-text-secondary);
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1rem;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body class="p-4">
+    <!-- Header -->
+    <header class="apple-header sticky top-0 z-10 px-6 py-4 mb-6 rounded-2xl">
+        <div class="max-w-7xl mx-auto flex flex-col items-center justify-center text-center">
+            <h1 class="text-2xl font-bold">Dashboard - ติดตาม S/O</h1>
+            <p class="text-sm text-gray-500 mt-1">ระบบติดตามความคืบหน้าการผลิต PD3</p>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Filter Section -->
+        <div class="apple-card p-6 mb-6" style="position: relative;">
+            <!-- Reset Button (Top Right) -->
+            <button onclick="resetDashboard()" class="reset-search-btn" title="รีเซ็ตการค้นหา" style="position: absolute; top: 12px; right: 12px; width: 32px; height: 32px;">
+                <svg fill="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                    <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                </svg>
+            </button>
+            
+            <div class="flex flex-wrap gap-4 items-end mb-4">
+                <div class="flex-1 min-w-[450px]">
+                    <label class="block text-sm font-semibold mb-3"> เลือก S/O Number</label>
+                    <div class="so-selector-container">
+                        <div class="so-select-wrapper">
+                            <label class="so-select-label">เลือก S/O จากรายการ</label>
+                            <div class="autocomplete-container" style="width: 100%;">
+                                <select id="soSelect" class="apple-select" style="width: 100%;">
+                                    <option value="">เลือก S/O</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="so-select-wrapper">
+                            <label class="so-select-label">หรือพิมพ์เลข S/O</label>
+                            <input type="text" 
+                                   id="soInput" 
+                                   class="so-manual-input" 
+                                   placeholder="พิมพ์เลข S/O..."
+                                   autocomplete="off">
+                            <div class="autocomplete-suggestions" id="soSuggestions"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-semibold mb-2">กำหนดเป้าหมาย:</label>
+                    <input type="text" 
+                           id="targetInput" 
+                           class="apple-select w-full" 
+                           placeholder="กรอกจำนวนเป้าหมาย (ใบ)"
+                           oninput="formatNumberInput(this)">
+                </div>
+                <div class="flex-1 min-w-[180px]">
+                    <label class="block text-sm font-semibold mb-2">วันที่เริ่มต้น:</label>
+                    <input type="date" 
+                           id="startDateInput" 
+                           class="apple-select w-full">
+                </div>
+                <div class="flex-1 min-w-[180px]">
+                    <label class="block text-sm font-semibold mb-2">วันที่สิ้นสุด:</label>
+                    <input type="date" 
+                           id="endDateInput" 
+                           class="apple-select w-full">
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex justify-center gap-4 mt-10">
+                <button id="calculateBtn" onclick="loadSOData()" class="px-8 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-semibold shadow-md hover:shadow-lg flex items-center gap-2">
+                    <span id="calculateSpinner" class="hidden">
+                        <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </span>
+                    <span id="calculateText">คำนวณ</span>
+                </button>
+                <button onclick="debugSystem()" class="px-8 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition font-semibold shadow-md hover:shadow-lg">
+                    ตรวจสอบระบบ
+                </button>
+                <a href="pd3_production_v3.html" class="px-8 py-3 text-white rounded-lg transition font-semibold shadow-md hover:shadow-lg inline-flex items-center justify-center" style="background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);">
+                    กลับหน้าหลัก
+                </a>
+            </div>
+        </div>
+        
+        <!-- Debug Panel -->
+        <div id="debugPanel" class="apple-card p-6 mb-6" style="display: none; background: #f8f9fa;">
+            <h3 class="text-xl font-semibold mb-4" style="color: var(--apple-purple);"> ข้อมูลระบบ</h3>
+            <div id="debugContent" style="font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.6;"></div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="loading-spinner"></div>
+
+        <!-- Main Content -->
+        <div id="mainContent" style="display: none;">
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <!-- Target Card -->
+                <div class="apple-card kpi-card">
+                    <div class="kpi-label">เป้าหมาย</div>
+                    <div class="kpi-value" style="color: var(--apple-blue);" id="kpiTarget">0</div>
+                    <div class="text-sm text-gray-500" id="kpiProduct">-</div>
+                </div>
+
+                <!-- Actual Card -->
+                <div class="apple-card kpi-card">
+                    <div class="kpi-label">ผลิตแล้ว</div>
+                    <div class="kpi-value" style="color: var(--apple-green);" id="kpiActual">0</div>
+                    <div class="text-sm text-gray-500" id="kpiProgress">0%</div>
+                </div>
+
+                <!-- Remaining Card -->
+                <div class="apple-card kpi-card">
+                    <div class="kpi-label">คงเหลือ</div>
+                    <div class="kpi-value" style="color: var(--apple-red);" id="kpiRemaining">0</div>
+                    <div class="text-sm text-gray-500" id="kpiDueDate">-</div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="apple-card p-6 mb-6" style="background: linear-gradient(135deg, #ffffff, #f8f9fa);">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <span class="text-lg font-semibold" style="color: var(--apple-text);">ความคืบหน้าการผลิต</span>
+                        <p class="text-sm text-gray-500 mt-1">Target vs Actual Production</p>
+                    </div>
+                    <div class="progress-percentage" id="progressPercent">0%</div>
+                </div>
+                <div class="progress-container" style="margin: 20px 0;">
+                    <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <div class="text-center">
+                        <div class="text-xs text-gray-500 mb-1">เริ่มต้น</div>
+                        <div class="text-lg font-semibold" id="progressStart">0</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-xs text-gray-500 mb-1"> เป้าหมาย</div>
+                        <div class="text-lg font-semibold" style="color: var(--apple-blue);" id="progressEnd">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bar Chart -->
+            <div class="apple-card p-6 mb-6" style="background: linear-gradient(135deg, #ffffff, #f0f4ff);">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-xl font-semibold" style="color: var(--apple-text);">กราฟแท่งรายละเอียดการพิมพ์</h2>
+                        <p class="text-sm text-gray-500 mt-1"></p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button id="chartViewDaily" class="chart-view-btn active" onclick="switchChartView('daily')">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                            </svg>
+                            รายวัน
+                        </button>
+                        <button id="chartViewShift" class="chart-view-btn" onclick="switchChartView('shift')">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
+                            </svg>
+                            รายกะ
+                        </button>
+                    </div>
+                </div>
+                <div class="bar-chart-container">
+                    <canvas id="barChart" style="max-height: 500px; min-height: 400px;"></canvas>
+                </div>
+                <div class="chart-legend" id="chartLegend"></div>
+            </div>
+
+
+
+            <!-- Data Table -->
+            <div class="apple-card p-6">
+                <h2 class="text-xl font-semibold mb-4">รายละเอียดการพิมพ์</h2>
+                <div class="overflow-x-auto">
+                    <table class="data-table" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>วันที่</th>
+                                <th>กะ</th>
+                                <th>PT</th>
+                                <th>ตรา</th>
+                                <th class="text-right">จำนวน</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody">
+                            <!-- Data will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="apple-card empty-state" style="display: none;">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <h3 class="text-xl font-semibold mb-2">ไม่พบข้อมูล</h3>
+            <p>กรุณาเลือก S/O Number หรือตรวจสอบว่ามีข้อมูลใน Database</p>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // Configuration
+        // ==========================================
+        const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbztZP1kcjxkc9ErzXstS5sQ9KEGyXDM4GK77AV7LYFrTMcdRIyLEzFQs5D6EQOBwMq-gQ/exec';
+
+        let barChartInstance = null;
+        let soList = []; // เก็บรายการ S/O ทั้งหมด
+        let chartData = null; // เก็บข้อมูลสำหรับกราฟ
+        let currentChartView = 'daily'; // daily หรือ shift
+
+        // ==========================================
+        // Initialize Page
+        // ==========================================
+        window.onload = function() {
+            console.log('🚀 Dashboard loading...');
+            loadSOList();
+        };
+
+        // ==========================================
+        // Load S/O List for Dropdown
+        // ==========================================
+        async function loadSOList() {
+            try {
+                showLoading(true);
+                const url = `${GOOGLE_APPS_SCRIPT_URL}?action=getSOList`;
+                console.log('Fetching S/O list:', url);
+
+                const response = await fetch(url);
+                const result = await response.json();
+
+                console.log('S/O List result:', result);
+
+                if (result.status === 'success' && result.data.length > 0) {
+                    soList = result.data; // เก็บข้อมูลไว้ใน global variable
+                    
+                    // Populate dropdown
+                    const soSelect = document.getElementById('soSelect');
+                    soSelect.innerHTML = '<option value=""> เลือก S/O </option>';
+                    result.data.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item.soNumber;
+                        option.textContent = `${item.soNumber} - ${item.productName || ''}`;
+                        soSelect.appendChild(option);
+                    });
+                    
+                    // Event listener for select
+                    soSelect.addEventListener('change', function() {
+                        if (this.value) {
+                            document.getElementById('soInput').value = this.value;
+                        }
+                    });
+                    
+                    initAutocomplete(); // เรียกใช้ autocomplete
+                    
+                    // Clear input และแสดง placeholder
+                    document.getElementById('soInput').placeholder = 'พิมพ์เลข S/O...';
+                } else {
+                    document.getElementById('soInput').placeholder = '-- ไม่พบข้อมูล S/O --';
+                    showEmptyState();
+                }
+            } catch (error) {
+                console.error('Error loading S/O list:', error);
+                alert('เกิดข้อผิดพลาดในการโหลดรายการ S/O: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // ==========================================
+        // Format Number Input with Comma Separator
+        // ==========================================
+        function formatNumberInput(input) {
+            // Remove all non-digit characters
+            let value = input.value.replace(/[^0-9]/g, '');
+            
+            // Add comma separators
+            if (value) {
+                value = parseInt(value).toLocaleString();
+            }
+            
+            input.value = value;
+        }
+
+        // ==========================================
+        // Show/Hide Calculate Button Spinner
+        // ==========================================
+        function setCalculating(isCalculating) {
+            const btn = document.getElementById('calculateBtn');
+            const spinner = document.getElementById('calculateSpinner');
+            const text = document.getElementById('calculateText');
+            
+            if (isCalculating) {
+                btn.disabled = true;
+                btn.classList.add('opacity-75', 'cursor-not-allowed');
+                spinner.classList.remove('hidden');
+                text.textContent = 'กำลังคำนวณ...';
+            } else {
+                btn.disabled = false;
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                spinner.classList.add('hidden');
+                text.textContent = 'คำนวณ';
+            }
+        }
+
+        // ==========================================
+        // Reset Dashboard
+        // ==========================================
+        function resetDashboard() {
+            // Reset S/O Selection
+            const soSelect = document.getElementById('soSelect');
+            const soInput = document.getElementById('soInput');
+            if (soSelect) soSelect.value = '';
+            if (soInput) soInput.value = '';
+            
+            // Reset Target & Dates
+            const targetInput = document.getElementById('targetInput');
+            const startDateInput = document.getElementById('startDateInput');
+            const endDateInput = document.getElementById('endDateInput');
+            if (targetInput) targetInput.value = '';
+            if (startDateInput) startDateInput.value = '';
+            if (endDateInput) endDateInput.value = '';
+            
+            // Clear all displayed data
+            const progressContainer = document.getElementById('progressContainer');
+            const gaugeContainer = document.getElementById('gaugeContainer');
+            const kpiCards = document.getElementById('kpiCards');
+            const barChartCard = document.getElementById('barChartCard');
+            const dataTable = document.getElementById('dataTable');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (progressContainer) progressContainer.style.display = 'none';
+            if (gaugeContainer) gaugeContainer.style.display = 'none';
+            if (kpiCards) kpiCards.style.display = 'none';
+            if (barChartCard) barChartCard.style.display = 'none';
+            if (dataTable) dataTable.style.display = 'none';
+            if (emptyState) emptyState.style.display = 'none';
+            
+            // Clear charts
+            if (window.barChartInstance) {
+                window.barChartInstance.destroy();
+                window.barChartInstance = null;
+            }
+            if (window.gaugeChartInstance) {
+                window.gaugeChartInstance.destroy();
+                window.gaugeChartInstance = null;
+            }
+            
+            // Clear table
+            const dataTableBody = document.getElementById('dataTableBody');
+            if (dataTableBody) {
+                dataTableBody.innerHTML = '';
+            }
+            
+            // Update button text
+            const calculateText = document.getElementById('calculateText');
+            if (calculateText) {
+                calculateText.textContent = 'คำนวณ';
+            }
+            
+            // Hide spinner
+            const calculateSpinner = document.getElementById('calculateSpinner');
+            if (calculateSpinner) {
+                calculateSpinner.classList.add('hidden');
+            }
+            
+            console.log('✅ รีเซ็ต Dashboard สำเร็จ');
+        }
+
+        // ==========================================
+        // Load S/O Data
+        // ==========================================
+        async function loadSOData() {
+            setCalculating(true);
+            const soInput = document.getElementById('soInput').value.trim();
+            const targetInput = document.getElementById('targetInput');
+            const startDateInput = document.getElementById('startDateInput').value;
+            const endDateInput = document.getElementById('endDateInput').value;
+            
+            if (!soInput) {
+                alert('กรุณาพิมพ์เลข S/O');
+                setCalculating(false);
+                return;
+            }
+            
+            // Remove commas from target input before parsing
+            const customTarget = parseFloat(targetInput.value.replace(/,/g, '')) || null;
+            
+            // ตรวจสอบว่า S/O ที่พิมพ์มีอยู่ในรายการหรือไม่
+            const soNumber = soInput.toUpperCase();
+            const soExists = soList.find(item => item.soNumber.toUpperCase() === soNumber);
+            
+            // ไม่บังคับให้มี S/O ในระบบ - สามารถค้นหา S/O ใดก็ได้
+            if (!soNumber) {
+                showEmptyState();
+                return;
+            }
+
+            try {
+                showLoading(true);
+                
+                // สร้าง URL พร้อม date range parameters และ customTarget
+                let url = `${GOOGLE_APPS_SCRIPT_URL}?action=getSOProgress&soNumber=${soNumber}`;
+                
+                if (startDateInput) {
+                    url += `&startDate=${startDateInput}`;
+                }
+                
+                if (endDateInput) {
+                    url += `&endDate=${endDateInput}`;
+                }
+                
+                if (customTarget) {
+                    url += `&customTarget=${customTarget}`;
+                }
+                
+                console.log('Fetching S/O data:', url);
+
+                const response = await fetch(url);
+                const result = await response.json();
+
+                console.log('S/O Progress result:', result);
+
+                if (result.status === 'success' || result.status === 'warning') {
+                    displayDashboard(result.data, customTarget);
+                } else {
+                    alert('เกิดข้อผิดพลาด: ' + result.message);
+                    showEmptyState();
+                }
+            } catch (error) {
+                console.error('Error loading S/O data:', error);
+                alert('เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + error.message);
+                showEmptyState();
+            } finally {
+                showLoading(false);
+                setCalculating(false);
+            }
+        }
+
+        // ==========================================
+        // Display Dashboard
+        // ==========================================
+        function displayDashboard(data, customTarget) {
+            console.log('📈 displayDashboard called with data:', data);
+            console.log('📈 customTarget:', customTarget);
+            
+            // Show main content
+            document.getElementById('mainContent').style.display = 'block';
+            document.getElementById('emptyState').style.display = 'none';
+            
+            // ใช้ target ตามลำดับ: customTarget → data.target → 0
+            const finalTarget = customTarget || data.target || 0;
+            const finalRemaining = finalTarget - data.actual;
+            const finalProgress = finalTarget > 0 ? Math.round((data.actual / finalTarget) * 1000) / 10 : 0;
+
+            // Update KPI Cards
+            document.getElementById('kpiTarget').textContent = finalTarget.toLocaleString();
+            document.getElementById('kpiActual').textContent = data.actual.toLocaleString();
+            document.getElementById('kpiRemaining').textContent = finalRemaining.toLocaleString();
+            document.getElementById('kpiProduct').textContent = data.productName || '-';
+            document.getElementById('kpiProgress').textContent = finalProgress + '%';
+            document.getElementById('kpiDueDate').textContent = `กำหนดส่ง: ${data.dueDate || '-'}`;
+
+            // Update Progress Bar
+            document.getElementById('progressPercent').textContent = finalProgress + '%';
+            document.getElementById('progressBar').style.width = finalProgress + '%';
+            document.getElementById('progressStart').textContent = '0';
+            document.getElementById('progressEnd').textContent = finalTarget.toLocaleString();
+
+            // Store data for chart
+            chartData = data;
+
+            console.log('📊 Calling updateBarChart with records:', data.records);
+            // Update Bar Chart
+            updateBarChart(data.records || [], finalProgress);
+
+            console.log('📋 Calling updateDataTable with records:', data.records);
+            // Update Data Table
+            updateDataTable(data.records || []);
+        }
+
+        // ==========================================
+        // Update Bar Chart
+        // ==========================================
+        function updateBarChart(records, progress) {
+            console.log('📊 updateBarChart called with records:', records, 'progress:', progress);
+            
+            const ctx = document.getElementById('barChart');
+
+            if (barChartInstance) {
+                barChartInstance.destroy();
+            }
+
+            // ประมวลผลข้อมูลตาม view mode
+            let labels = [];
+            let dataValues = [];
+            let backgroundColors = [];
+            let borderColors = [];
+
+            if (currentChartView === 'daily') {
+                console.log('📅 Chart view: Daily');
+                // จัดกลุ่มตามวันที่
+                const dailyData = {};
+                records.forEach(record => {
+                    const date = record.date || record['วันที่'] || 'N/A';
+                    const qty = parseFloat(record.quantity || record['จำนวน'] || 0);
+                    if (!dailyData[date]) {
+                        dailyData[date] = 0;
+                    }
+                    dailyData[date] += qty;
+                });
+
+                console.log('📅 Daily data:', dailyData);
+
+                // เรียงตามวันที่
+                const sortedDates = Object.keys(dailyData).sort();
+                labels = sortedDates.map(date => formatDate(date)); // แปลงวันที่เป็นรูปแบบ DD/MM/YYYY
+                dataValues = sortedDates.map(date => dailyData[date]);
+
+                console.log('📅 Labels:', labels);
+                console.log('📅 Values:', dataValues);
+
+                // สีแบบ gradient ตามค่า
+                sortedDates.forEach((_, index) => {
+                    const hue = 200 + (index * 30) % 160; // สีเปลี่ยนจากน้ำเงินไปเขียว
+                    backgroundColors.push(`hsla(${hue}, 75%, 55%, 0.8)`);
+                    borderColors.push(`hsla(${hue}, 75%, 45%, 1)`);
+                });
+
+            } else {
+                // จัดกลุ่มตามกะ (เฉพาะกะ A และ B)
+                const shiftData = {
+                    'A': 0,
+                    'B': 0
+                };
+                
+                records.forEach(record => {
+                    const shift = (record.shift || record['กะ'] || '').toUpperCase();
+                    const qty = parseFloat(record.quantity || record['จำนวน'] || 0);
+                    if (shiftData.hasOwnProperty(shift)) {
+                        shiftData[shift] += qty;
+                    }
+                });
+
+                labels = ['กะ A', 'กะ B'];
+                dataValues = [shiftData['A'], shiftData['B']];
+                
+                // สีเฉพาะสำหรับแต่ละกะ (HD sharp colors)
+                backgroundColors = [
+                    'rgba(0, 122, 255, 0.95)',   // น้ำเงินสดใส - กะ A
+                    'rgba(255, 149, 0, 0.95)'    // ส้มสดใส - กะ B
+                ];
+                borderColors = [
+                    'rgba(0, 122, 255, 1)',
+                    'rgba(255, 149, 0, 1)'
+                ];
+            }
+
+            // ใช้สีเดียวแบบ Flat 2D (HD Sharp) - ไม่ใช้ gradient
+            const finalColors = backgroundColors;
+
+            barChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'จำนวนที่ผลิต',
+                        data: dataValues,
+                        backgroundColor: finalColors,
+                        borderColor: borderColors,
+                        borderWidth: 3,
+                        borderRadius: 6,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    devicePixelRatio: window.devicePixelRatio || 2,
+                    animation: {
+                        duration: 1200,
+                        easing: 'easeInOutQuart'
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.08)',
+                                drawBorder: false,
+                                lineWidth: 1.5
+                            },
+                            ticks: {
+                                font: {
+                                    size: 13,
+                                    family: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
+                                    weight: '700'
+                                },
+                                color: '#3a3a3c',
+                                padding: 12,
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            },
+                            border: {
+                                display: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 14,
+                                    family: '-apple-system, BlinkMacSystemFont, sans-serif',
+                                    weight: '700'
+                                },
+                                color: '#000000',
+                                padding: 12
+                            },
+                            border: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: 'rgba(0, 0, 0, 0.92)',
+                            titleFont: {
+                                size: 15,
+                                weight: '700',
+                                family: '-apple-system, BlinkMacSystemFont, sans-serif'
+                            },
+                            bodyFont: {
+                                size: 14,
+                                weight: '600',
+                                family: '-apple-system, BlinkMacSystemFont, sans-serif'
+                            },
+                            padding: 14,
+                            cornerRadius: 8,
+                            displayColors: true,
+                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                            borderWidth: 2,
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    return tooltipItems[0].label;
+                                },
+                                label: function(context) {
+                                    const value = context.parsed.y;
+                                    return `จำนวน: ${value.toLocaleString()} ชิ้น`;
+                                },
+                                afterLabel: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed.y / total) * 100).toFixed(1);
+                                    return `สัดส่วน: ${percentage}%`;
+                                }
+                            }
+                        },
+                        datalabels: false
+                    },
+                    layout: {
+                        padding: {
+                            top: 50,
+                            right: 20,
+                            bottom: 15,
+                            left: 15
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'customCanvasBackgroundColor',
+                    beforeDraw: (chart) => {
+                        const ctx = chart.canvas.getContext('2d');
+                        ctx.save();
+                        ctx.globalCompositeOperation = 'destination-over';
+                        ctx.fillStyle = 'transparent';
+                        ctx.fillRect(0, 0, chart.width, chart.height);
+                        ctx.restore();
+                    }
+                }, {
+                    id: 'dataLabelsOnTop',
+                    afterDatasetsDraw: (chart) => {
+                        const ctx = chart.ctx;
+                        chart.data.datasets.forEach((dataset, datasetIndex) => {
+                            const meta = chart.getDatasetMeta(datasetIndex);
+                            meta.data.forEach((bar, index) => {
+                                const value = dataset.data[index];
+                                
+                                // ตรวจสอบว่ามีค่าก่อนจึงแสดง
+                                if (!value || value === 0) return;
+                                
+                                ctx.save();
+                                ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, sans-serif';
+                                ctx.fillStyle = '#000000';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'bottom';
+                                
+                                // วาดค่าที่ด้านบนของแท่ง
+                                const text = value.toLocaleString();
+                                const x = bar.x;
+                                const y = bar.y - 8;
+                                
+                                ctx.fillText(text, x, y);
+                                ctx.restore();
+                            });
+                        });
+                    }
+                }]
+            });
+
+            // อัพเดท Legend
+            updateChartLegend(labels, dataValues, backgroundColors);
+        }
+
+        // ==========================================
+        // Update Chart Legend
+        // ==========================================
+        function updateChartLegend(labels, values, colors) {
+            const legendDiv = document.getElementById('chartLegend');
+            const total = values.reduce((a, b) => a + b, 0);
+
+            let legendHTML = '';
+            labels.forEach((label, index) => {
+                const value = values[index];
+                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                
+                legendHTML += `
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: ${colors[index]};"></div>
+                        <span class="legend-label">${label}</span>
+                        <span class="legend-value">${value.toLocaleString()} (${percentage}%)</span>
+                    </div>
+                `;
+            });
+
+            legendDiv.innerHTML = legendHTML;
+        }
+
+        // ==========================================
+        // Switch Chart View
+        // ==========================================
+        function switchChartView(view) {
+            currentChartView = view;
+            
+            // Update button states
+            document.getElementById('chartViewDaily').classList.toggle('active', view === 'daily');
+            document.getElementById('chartViewShift').classList.toggle('active', view === 'shift');
+            
+            // Redraw chart
+            if (chartData && chartData.records) {
+                const finalTarget = chartData.target || 0;
+                const finalProgress = finalTarget > 0 ? Math.round((chartData.actual / finalTarget) * 1000) / 10 : 0;
+                updateBarChart(chartData.records, finalProgress);
+            }
+        }
+
+
+        // ==========================================
+        // Format Date Helper
+        // ==========================================
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            
+            try {
+                // Handle ISO date format (2026-02-01T17:00:00.000Z)
+                const date = new Date(dateString);
+                
+                // Check if valid date
+                if (isNaN(date.getTime())) return dateString;
+                
+                // Format as DD/MM/YYYY
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                
+                return `${day}/${month}/${year}`;
+            } catch (error) {
+                return dateString;
+            }
+        }
+
+        // ==========================================
+        // Update Data Table
+        // ==========================================
+        function updateDataTable(records) {
+            console.log('📊 updateDataTable called with records:', records);
+            
+            const tbody = document.getElementById('dataTableBody');
+            if (!tbody) {
+                console.error('❌ dataTableBody element not found!');
+                return;
+            }
+            
+            tbody.innerHTML = '';
+
+            if (!records || records.length === 0) {
+                console.warn('⚠️ No records to display');
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500">ไม่มีข้อมูล</td></tr>';
+                return;
+            }
+
+            console.log(`✅ Processing ${records.length} records...`);
+
+            // Sort by date descending
+            const sortedRecords = [...records].sort((a, b) => {
+                const dateA = new Date(a.date || a['วันที่']);
+                const dateB = new Date(b.date || b['วันที่']);
+                return dateB - dateA;
+            });
+
+            sortedRecords.forEach((record, index) => {
+                console.log(`Record ${index}:`, record);
+                
+                const row = document.createElement('tr');
+                
+                // รองรับทั้ง property name ภาษาอังกฤษและไทย
+                const date = record.date || record['วันที่'];
+                const shift = record.shift || record['กะ'];
+                const pt = record.pt || record['PT'];
+                const brand = record.brand || record['ตรา'];
+                const quantity = record.quantity || record['จำนวน'];
+                
+                row.innerHTML = `
+                    <td>${formatDate(date)}</td>
+                    <td><span class="badge badge-shift-${(shift || '').toLowerCase()}">${shift || '-'}</span></td>
+                    <td>PT ${pt || '-'}</td>
+                    <td>${brand || '-'}</td>
+                    <td class="text-right font-semibold">${parseFloat(quantity || 0).toLocaleString()}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            console.log('✅ Data table updated successfully');
+        }
+
+        // ==========================================
+        // Autocomplete Functions
+        // ==========================================
+        function initAutocomplete() {
+            const input = document.getElementById('soInput');
+            const suggestionsDiv = document.getElementById('soSuggestions');
+            let selectedIndex = -1;
+
+            input.addEventListener('input', function() {
+                const value = this.value.toUpperCase().trim();
+                
+                if (value.length === 0) {
+                    suggestionsDiv.classList.remove('show');
+                    return;
+                }
+
+                const matches = soList.filter(item => 
+                    item.soNumber.toUpperCase().includes(value) ||
+                    (item.productName && item.productName.includes(value))
+                ).slice(0, 10);
+
+                if (matches.length === 0) {
+                    suggestionsDiv.innerHTML = '<div class="autocomplete-no-results">ไม่พบรายการที่ตรงกัน</div>';
+                    suggestionsDiv.classList.add('show');
+                    return;
+                }
+
+                suggestionsDiv.innerHTML = matches.map(item => {
+                    const displayText = `${item.soNumber} - ${item.productName || ''}`;
+                    // No highlighting - just show the text as is
+                    return `<div class="autocomplete-item" data-value="${item.soNumber}">${displayText}</div>`;
+                }).join('');
+                
+                suggestionsDiv.classList.add('show');
+                selectedIndex = -1;
+            });
+
+            input.addEventListener('keydown', function(e) {
+                const items = suggestionsDiv.querySelectorAll('.autocomplete-item');
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                    updateSelection(items, selectedIndex);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, -1);
+                    updateSelection(items, selectedIndex);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (selectedIndex >= 0) {
+                        items[selectedIndex].click();
+                    } else {
+                        loadSOData(); // กด Enter โดยไม่มีรายการที่เลือก = คำนวณเลย
+                    }
+                } else if (e.key === 'Escape') {
+                    suggestionsDiv.classList.remove('show');
+                    selectedIndex = -1;
+                }
+            });
+
+            input.addEventListener('blur', function() {
+                setTimeout(() => {
+                    suggestionsDiv.classList.remove('show');
+                    selectedIndex = -1;
+                }, 200);
+            });
+
+            suggestionsDiv.addEventListener('click', function(e) {
+                if (e.target.classList.contains('autocomplete-item')) {
+                    input.value = e.target.dataset.value;
+                    suggestionsDiv.classList.remove('show');
+                    selectedIndex = -1;
+                }
+            });
+        }
+        
+        function updateSelection(items, index) {
+            items.forEach((item, i) => {
+                item.classList.toggle('active', i === index);
+            });
+            if (index >= 0 && items[index]) {
+                items[index].scrollIntoView({ block: 'nearest' });
+            }
+        }
+        
+        function escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+        
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // ==========================================
+        // Helper Functions
+        // ==========================================        
+        async function debugSystem() {
+            const debugPanel = document.getElementById('debugPanel');
+            const debugContent = document.getElementById('debugContent');
+            
+            debugPanel.style.display = 'block';
+            debugContent.innerHTML = '<div style="color: #666;">⏳ กำลังตรวจสอบ...</div>';
+            
+            try {
+                // 1. ตรวจสอบ API Connection
+                const apiUrl = `${GOOGLE_APPS_SCRIPT_URL}`;
+                const apiResponse = await fetch(apiUrl);
+                const apiResult = await apiResponse.json();
+                
+                // 2. ตรวจสอบ Database Sheet
+                const dbUrl = `${GOOGLE_APPS_SCRIPT_URL}?action=getDatabaseData`;
+                const dbResponse = await fetch(dbUrl);
+                const dbResult = await dbResponse.json();
+                
+                // 3. ตรวจสอบ S/O List
+                const soUrl = `${GOOGLE_APPS_SCRIPT_URL}?action=getSOList`;
+                const soResponse = await fetch(soUrl);
+                const soResult = await soResponse.json();
+                
+                // 4. แสดงผล
+                let html = '<div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #34c759;">';
+                
+                // API Status
+                html += '<div style="margin-bottom: 20px;">';
+                html += '<strong style="color: #34c759; font-size: 16px;">🌐 API Connection:</strong><br>';
+                if (apiResult.status === 'OK') {
+                    html += `<span style="color: #34c759;">✅ เชื่อมต่อสำเร็จ</span><br>`;
+                    html += `<span style="color: #666; font-size: 13px;">Message: ${apiResult.message}</span><br>`;
+                    html += `<span style="color: #666; font-size: 13px;">Timestamp: ${apiResult.timestamp}</span>`;
+                } else {
+                    html += '<span style="color: #ff3b30;">❌ ไม่สามารถเชื่อมต่อ API</span>';
+                }
+                html += '</div>';
+                
+                // S/O List
+                html += '<div style="margin-bottom: 20px;">';
+                html += '<strong style="color: #af52de; font-size: 16px;">📋 S/O List:</strong><br>';
+                if (soResult.status === 'success' && soResult.data.length > 0) {
+                    html += `<span style="color: #34c759;">✅ มี S/O ทั้งหมด ${soResult.data.length} รายการ</span><br>`;
+                    html += '<div style="margin-top: 10px;">';
+                    soResult.data.slice(0, 10).forEach(item => {
+                        html += `<div style="margin: 5px 0; padding: 6px; background: #f0f0f0; border-radius: 4px;">`;
+                        html += `• <strong>${item.soNumber}</strong> - ${item.productName}`;
+                        html += `</div>`;
+                    });
+                    if (soResult.data.length > 10) {
+                        html += `<div style="color: #666; font-size: 13px; margin-top: 5px;">... และอีก ${soResult.data.length - 10} รายการ</div>`;
+                    }
+                    html += '</div>';
+                } else {
+                    html += '<span style="color: #ff9500;">⚠️ ยังไม่มี S/O ในระบบ</span><br>';
+                    html += '<span style="color: #666; font-size: 13px;">→ ต้องบันทึกข้อมูลจากหน้า Production ก่อน</span>';
+                }
+                html += '</div>';
+                
+                // Database
+                html += '<div>';
+                html += '<strong style="color: #0071e3; font-size: 16px;">📦 Database Sheet (ข้อมูลการผลิต):</strong><br>';
+                if (dbResult.status === 'success' && dbResult.data.length > 0) {
+                    html += `<span style="color: #34c759;">✅ มีข้อมูล ${dbResult.data.length} รายการ</span><br>`;
+                    
+                    // นับจำนวนแต่ละ S/O
+                    const soCount = {};
+                    dbResult.data.forEach(record => {
+                        const so = record.soNumber || 'ไม่ระบุ';
+                        soCount[so] = (soCount[so] || 0) + parseFloat(record.quantity || 0);
+                    });
+                    
+                    html += '<div style="margin-top: 10px;">';
+                    html += '<strong>สรุปยอดผลิตแต่ละ S/O:</strong><br>';
+                    Object.keys(soCount).sort().forEach(so => {
+                        html += `<div style="margin: 5px 0; padding: 6px; background: #e3f2fd; border-radius: 4px;">`;
+                        html += `${so}: <strong>${soCount[so].toLocaleString()}</strong> ใบ`;
+                        html += `</div>`;
+                    });
+                    html += '</div>';
+                } else {
+                    html += '<span style="color: #ff9500;">⚠️ ยังไม่มีข้อมูลการผลิต</span><br>';
+                    html += '<span style="color: #666; font-size: 13px;">→ ต้องบันทึกข้อมูลจากหน้า Production ก่อน</span>';
+                }
+                html += '</div>';
+                
+                html += '</div>';
+                
+                // วิธีใช้งาน
+                html += '<div style="margin-top: 20px; padding: 15px; background: #d1ecf1; border-left: 4px solid #0071e3; border-radius: 8px;">';
+                html += '<strong style="color: #0c5460;">💡 วิธีใช้งาน Dashboard:</strong><br>';
+                html += '<ol style="margin: 10px 0; padding-left: 20px; color: #0c5460;">';
+                html += '<li><strong>พิมพ์เลข S/O:</strong> เริ่มพิมพ์ในช่องค้นหา ระบบจะแสดงรายการ S/O ที่มีอยู่</li>';
+                html += '<li><strong>กรอก Target:</strong> ใส่ยอดเป้าหมาย (เช่น 15000)</li>';
+                html += '<li><strong>เลือกช่วงวันที่:</strong> (ไม่บังคับ) สำหรับกรองข้อมูล</li>';
+                html += '<li><strong>กดค้นหา:</strong> ระบบจะแสดงความคืบหน้า Target vs Actual</li>';
+                html += '</ol>';
+                html += '<div style="margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 4px;">';
+                html += '<strong>⚠️ หมายเหตุ:</strong> ต้องมีข้อมูลการผลิตใน Database Sheet ก่อนจึงจะค้นหาได้';
+                html += '</div>';
+                html += '</div>';
+                
+                debugContent.innerHTML = html;
+                
+            } catch (error) {
+                debugContent.innerHTML = `<div style="color: #ff3b30;">❌ เกิดข้อผิดพลาด: ${error.message}</div>`;
+            }
+        }
+        // ==========================================
+        // Utility Functions
+        // ==========================================
+        function showLoading(show) {
+            // ����ö���� loading indicator ���ҵ�ͧ���
+            if (show) {
+                console.log('? Loading...');
+            } else {
+                console.log('? Loaded');
+            }
+        }
+
+        function showEmptyState() {
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Connection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-box {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #0071e3;
+            padding-bottom: 10px;
+        }
+        button {
+            background: #0071e3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0051a8;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #0071e3;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success { border-left-color: #34c759; background: #f0fff4; }
+        .error { border-left-color: #ff3b30; background: #fff5f5; color: #c53030; }
+        .loading { color: #666; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test PD3 API Connection</h1>
+    
+    <div class="test-box">
+        <h2>1. Test API Status</h2>
+        <button onclick="testAPIStatus()">Test API Connection</button>
+        <div id="result1" class="result loading">คลิกปุ่มเพื่อทดสอบ</div>
+    </div>
+
+    <div class="test-box">
+        <h2>2. Test Get S/O List</h2>
+        <button onclick="testGetSOList()">Get S/O List</button>
+        <div id="result2" class="result loading">คลิกปุ่มเพื่อทดสอบ</div>
+    </div>
+
+    <div class="test-box">
+        <h2>3. Test Get Database Data</h2>
+        <button onclick="testGetDatabaseData()">Get Database Data</button>
+        <div id="result3" class="result loading">คลิกปุ่มเพื่อทดสอบ</div>
+    </div>
+
+    <div class="test-box">
+        <h2>4. Test Get S/O Progress (with custom target)</h2>
+        <input type="text" id="testSO" placeholder="เลข S/O (เช่น MK123456)" style="padding: 8px; width: 200px; margin-right: 10px;">
+        <input type="number" id="testTarget" placeholder="Target (เช่น 15000)" style="padding: 8px; width: 150px; margin-right: 10px;">
+        <button onclick="testGetSOProgress()">Test S/O Progress</button>
+        <div id="result4" class="result loading">คลิกปุ่มเพื่อทดสอบ</div>
+    </div>
+
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbztZP1kcjxkc9ErzXstS5sQ9KEGyXDM4GK77AV7LYFrTMcdRIyLEzFQs5D6EQOBwMq-gQ/exec';
+
+        async function testAPIStatus() {
+            const resultDiv = document.getElementById('result1');
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = '⏳ กำลังทดสอบ...';
+
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ SUCCESS!\n\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ERROR!\n\n${error.message}\n\nStack:\n${error.stack}`;
+            }
+        }
+
+        async function testGetSOList() {
+            const resultDiv = document.getElementById('result2');
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = '⏳ กำลังดึงข้อมูล S/O List...';
+
+            try {
+                const url = `${API_URL}?action=getSOList`;
+                console.log('Fetching:', url);
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ SUCCESS! พบ S/O จำนวน ${data.data.length} รายการ\n\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `⚠️ WARNING!\n\n${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ERROR!\n\n${error.message}\n\nStack:\n${error.stack}`;
+            }
+        }
+
+        async function testGetDatabaseData() {
+            const resultDiv = document.getElementById('result3');
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = '⏳ กำลังดึงข้อมูล Database...';
+
+            try {
+                const url = `${API_URL}?action=getDatabaseData`;
+                console.log('Fetching:', url);
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ SUCCESS! พบข้อมูล ${data.data.length} รายการ\n\n${JSON.stringify(data.data.slice(0, 3), null, 2)}\n\n... และอีก ${data.data.length - 3} รายการ`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `⚠️ WARNING!\n\n${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ERROR!\n\n${error.message}\n\nStack:\n${error.stack}`;
+            }
+        }
+
+        async function testGetSOProgress() {
+            const soNumber = document.getElementById('testSO').value.trim();
+            const target = document.getElementById('testTarget').value.trim();
+            const resultDiv = document.getElementById('result4');
+            
+            if (!soNumber || !target) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ กรุณากรอกเลข S/O และ Target';
+                return;
+            }
+
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = '⏳ กำลังคำนวณความคืบหน้า...';
+
+            try {
+                const url = `${API_URL}?action=getSOProgress&soNumber=${soNumber}&customTarget=${target}`;
+                console.log('Fetching:', url);
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.status === 'success' || data.status === 'warning') {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ SUCCESS!\n\nTarget: ${data.data.target.toLocaleString()}\nActual: ${data.data.actual.toLocaleString()}\nRemaining: ${data.data.remaining.toLocaleString()}\nProgress: ${data.data.progress}%\n\nFull Response:\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ ERROR!\n\n${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ERROR!\n\n${error.message}\n\nStack:\n${error.stack}`;
+            }
+        }
+    </script>
+</body>
+</html>
