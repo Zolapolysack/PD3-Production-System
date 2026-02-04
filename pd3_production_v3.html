@@ -1,0 +1,4079 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>ระบบบันทึกยอดผลิต PD3</title>
+    <script src="https://cdn.tailwindcss.com/3.4.10"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Apple-inspired Theme */
+        :root {
+            --apple-bg: #f5f5f7;
+            --apple-card: #ffffff;
+            --apple-text: #1d1d1f;
+            --apple-text-secondary: #86868b;
+            --apple-blue: #0071e3;
+            --apple-blue-hover: #0077ed;
+            --apple-green: #34c759;
+            --apple-orange: #ff9500;
+            --apple-red: #ff3b30;
+            --apple-purple: #af52de;
+            --apple-border: #d2d2d7;
+            --apple-shadow: rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            font-family: 'Kanit', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background-color: var(--apple-bg);
+            color: var(--apple-text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Card Style */
+        .apple-card {
+            background: var(--apple-card);
+            border-radius: 18px;
+            box-shadow: 0 2px 8px var(--apple-shadow), 0 8px 24px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+            position: relative;
+        }
+
+        .apple-card:hover {
+            box-shadow: 0 4px 12px var(--apple-shadow), 0 12px 32px rgba(0, 0, 0, 0.08);
+            transform: translateY(-1px);
+        }
+
+        /* Premium glow effect for special cards */
+        .apple-card.premium-glow {
+            box-shadow: 
+                0 2px 8px var(--apple-shadow), 
+                0 8px 24px rgba(0, 0, 0, 0.06),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+        }
+
+        .apple-card.premium-glow::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.1) 0%,
+                transparent 50%,
+                rgba(255, 255, 255, 0.05) 100%
+            );
+            border-radius: 18px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .apple-card.premium-glow:hover::before {
+            opacity: 1;
+        }
+
+        /* Header */
+        .apple-header {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        /* Input Style */
+        .apple-input {
+            background: #ffffff;
+            border: 1.5px solid #d2d2d7;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 15px;
+            color: var(--apple-text);
+            transition: all 0.2s ease;
+            width: 100%;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .apple-input:focus {
+            outline: none;
+            border-color: var(--apple-blue);
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+        }
+
+        .apple-input:disabled, .apple-input[readonly] {
+            background: #f5f5f7;
+            color: var(--apple-text-secondary);
+            cursor: not-allowed;
+        }
+
+        /* Select Style */
+        .apple-select {
+            background: #ffffff;
+            border: 1.5px solid #d2d2d7;
+            border-radius: 10px;
+            padding: 10px 35px 10px 12px;
+            font-size: 15px;
+            color: var(--apple-text);
+            transition: all 0.2s ease;
+            width: 100%;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .apple-select:focus {
+            outline: none;
+            border-color: var(--apple-blue);
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+        }
+
+        /* Textarea */
+        .apple-textarea {
+            background: #ffffff;
+            border: 1.5px solid #d2d2d7;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 15px;
+            color: var(--apple-text);
+            transition: all 0.2s ease;
+            width: 100%;
+            resize: vertical;
+            min-height: 60px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .apple-textarea:focus {
+            outline: none;
+            border-color: var(--apple-blue);
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+        }
+
+        /* Button Style */
+        .apple-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+            cursor: pointer;
+            border: none;
+            gap: 8px;
+        }
+
+        .apple-btn-primary {
+            background: linear-gradient(135deg, var(--apple-blue) 0%, #005bb5 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .apple-btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .apple-btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(0, 113, 227, 0.4);
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .apple-btn-primary:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .apple-btn-primary:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .apple-btn-success {
+            background: var(--apple-green);
+            color: white;
+        }
+
+        .apple-btn-success:hover {
+            background: #30d158;
+            transform: scale(1.02);
+        }
+
+        .apple-btn-orange {
+            background: var(--apple-orange);
+            color: white;
+        }
+
+        .apple-btn-orange:hover {
+            background: #ff9f0a;
+            transform: scale(1.02);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #334155;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            letter-spacing: 0.3px;
+        }
+
+        .status-badge:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-color: #cbd5e1;
+        }
+
+        .status-online {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            color: #334155;
+            border: 1px solid #e2e8f0;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+
+        /* Time Display */
+        .time-display {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #334155;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .time-display:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-color: #cbd5e1;
+        }
+
+        .time-display svg {
+            flex-shrink: 0;
+        }
+
+        .time-value {
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        /* Table Style */
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .data-table th {
+            background: #f5f5f7;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--apple-text);
+            border-bottom: 2px solid var(--apple-border);
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e5e5;
+            vertical-align: top;
+            position: relative;
+        }
+
+        /* Group styling - every 3 rows (1 PT machine) with border */
+        /* PT 1, 3, 5, 7 (odd machines) - light gray background */
+        .data-table tbody tr:nth-child(6n-5),
+        .data-table tbody tr:nth-child(6n-4),
+        .data-table tbody tr:nth-child(6n-3) {
+            background: #f5f5f7;
+        }
+
+        /* PT 2, 4, 6 (even machines) - white background */
+        .data-table tbody tr:nth-child(6n-2),
+        .data-table tbody tr:nth-child(6n-1),
+        .data-table tbody tr:nth-child(6n) {
+            background: #ffffff;
+        }
+
+        /* Add top border to first row of each PT machine */
+        .data-table tbody tr.row-part1 td {
+            border-top: 2px solid #d1d5db;
+        }
+
+        /* Add side borders to group rows together */
+        .data-table tbody tr.row-part1 td:first-child,
+        .data-table tbody tr.row-part2 td:first-child,
+        .data-table tbody tr.row-part3 td:first-child {
+            border-left: 2px solid #d1d5db;
+        }
+
+        .data-table tbody tr.row-part1 td:last-child,
+        .data-table tbody tr.row-part2 td:last-child,
+        .data-table tbody tr.row-part3 td:last-child {
+            border-right: 2px solid #d1d5db;
+        }
+
+        /* Add bottom border to third row of each PT machine */
+        .data-table tbody tr.row-part3 td {
+            border-bottom: 2px solid #d1d5db;
+        }
+
+        /* Remove border between paired rows of same machine */
+        .data-table tbody tr.row-part1 td {
+            padding-bottom: 12px;
+        }
+
+        .data-table tbody tr.row-part2 td {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            vertical-align: top;
+        }
+
+        .data-table tbody tr.row-part3 td {
+            padding-top: 12px;
+            vertical-align: top;
+        }
+
+        /* Header row for each PT machine */
+        .data-table tbody tr.pt-header td {
+            background: transparent;
+            padding: 6px 12px 2px 12px;
+            font-weight: 500;
+            font-size: 12px;
+            color: var(--apple-text-secondary);
+            border-bottom: none;
+            text-align: left;
+        }
+
+        .data-table tbody tr.pt-header-sub td {
+            background: transparent;
+            padding: 2px 12px 6px 12px;
+            font-weight: 500;
+            font-size: 12px;
+            color: var(--apple-text-secondary);
+            border-bottom: none;
+            text-align: left;
+        }
+
+        /* Field label above input */
+        .field-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--apple-text-secondary);
+            margin-bottom: 8px;
+            line-height: 1.2;
+            min-height: 20px;
+            letter-spacing: 0.2px;
+        }
+
+        /* Table cell vertical alignment */
+        .data-table tbody td {
+            vertical-align: top;
+            padding: 12px;
+        }
+
+        /* Ensure all input fields have consistent height */
+        .apple-input,
+        .apple-select {
+            min-height: 42px;
+            height: 42px;
+            padding: 8px 12px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .apple-textarea {
+            min-height: 84px;
+            padding: 10px 12px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Time input specific */
+        .time-input {
+            height: 42px !important;
+            min-height: 42px !important;
+            padding: 8px 12px !important;
+        }
+
+        /* Employee and Brand select fields */
+        .employee-select-small,
+        .brand-select-small {
+            height: 42px;
+            min-height: 42px;
+            padding: 8px 12px;
+        }
+
+        .employee-input-small,
+        .brand-input-small {
+            height: 42px;
+            min-height: 42px;
+            padding: 8px 12px;
+        }
+
+        /* Employee and Brand buttons */
+        .employee-add-btn,
+        .brand-add-btn {
+            height: 42px;
+            min-height: 42px;
+            padding: 0 14px;
+        }
+
+        /* Container alignment */
+        .employee-container,
+        .brand-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 42px;
+        }
+
+        /* Input group alignment */
+        .employee-input-group,
+        .brand-input-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 4px;
+            flex-wrap: nowrap;
+        }
+
+        /* PT Badge alignment */
+        .pt-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 65px;
+            height: 42px;
+            padding: 0 14px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            box-shadow: 0 2px 8px rgba(30, 58, 138, 0.25);
+            letter-spacing: 0.3px;
+        }
+
+        /* Hover effect for entire machine group */
+        .data-table tbody tr:hover {
+            background: #e8f4ff !important;
+            transition: background 0.2s ease;
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Section Header */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--apple-border);
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .badge-shift-a {
+            background: linear-gradient(135deg, #0066cc 0%, #004c99 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+        }
+
+        .badge-shift-b {
+            background: linear-gradient(135deg, #ff6b35 0%, #e63946 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+        }
+
+        /* PT Badge */
+        .pt-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 65px;
+            padding: 8px 14px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            box-shadow: 0 2px 8px rgba(30, 58, 138, 0.25);
+            letter-spacing: 0.3px;
+        }
+
+        /* Employee Tag/Chip System */
+        .employee-container {
+            min-height: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .employee-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-height: 0;
+        }
+
+        .employee-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .employee-tag:hover {
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .employee-tag-remove {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .employee-tag-remove:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .employee-add-btn {
+            background: var(--apple-green);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .employee-add-btn:hover {
+            background: #30d158;
+            transform: scale(1.02);
+        }
+
+        .employee-add-btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .employee-count {
+            font-size: 12px;
+            color: var(--apple-text-secondary);
+            margin-top: 0;
+        }
+
+        /* Brand Tag/Chip System */
+        .brand-container {
+            min-height: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .brand-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-height: 0;
+        }
+
+        .brand-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: 0 2px 6px rgba(245, 158, 11, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .brand-tag:hover {
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .brand-tag-remove {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .brand-tag-remove:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .brand-add-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .brand-add-btn:hover {
+            background: #d97706;
+            transform: scale(1.02);
+        }
+
+        .brand-add-btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .brand-count {
+            font-size: 12px;
+            color: var(--apple-text-secondary);
+            margin-top: 0;
+        }
+
+        /* S/O Fields Container */
+        .so-fields-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 8px;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .so-field-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s ease;
+        }
+
+        .so-field-row:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .so-brand-label {
+            min-width: 120px;
+            max-width: 120px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #4c4949;
+            padding: 6px 10px;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-radius: 6px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #93c5fd;
+        }
+
+        .so-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .so-input {
+            background: #ffffff;
+            border: 1.5px solid #d2d2d7;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: var(--apple-text);
+            transition: all 0.2s ease;
+            width: 100%;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .so-input:focus {
+            outline: none;
+            border-color: var(--apple-blue);
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+        }
+
+        .so-input::placeholder {
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        .so-empty-state {
+            padding: 16px;
+            text-align: center;
+            color: var(--apple-text-secondary);
+            font-size: 13px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px dashed #d1d5db;
+        }
+
+        /* Time Fields Container */
+        .time-fields-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 8px;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .time-field-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s ease;
+        }
+
+        .time-field-row:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .time-brand-label {
+            min-width: 120px;
+            max-width: 120px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #065f46;
+            padding: 6px 10px;
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-radius: 6px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #6ee7b7;
+        }
+
+        .time-inputs-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .time-input-small {
+            background: #ffffff;
+            border: 1.5px solid #d2d2d7;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: var(--apple-text);
+            transition: all 0.2s ease;
+            width: 80px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .time-input-small:focus {
+            outline: none;
+            border-color: var(--apple-blue);
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+        }
+
+        .time-input-small::placeholder {
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        .time-separator {
+            color: var(--apple-text-secondary);
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .time-empty-state {
+            padding: 16px;
+            text-align: center;
+            color: var(--apple-text-secondary);
+            font-size: 13px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px dashed #d1d5db;
+        }
+
+        .time-header {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--apple-text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Quantity Fields Container */
+        .quantity-fields-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 8px;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .quantity-field-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s ease;
+        }
+
+        .quantity-field-row:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .quantity-brand-label {
+            min-width: 120px;
+            max-width: 120px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #581c87;
+            padding: 6px 10px;
+            background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+            border-radius: 6px;
+            text-align: center;
+            whitespace: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #c084fc;
+        }
+
+        .quantity-input-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .quantity-input-small {
+            background: #ffffff;
+            border: 1.5px solid #d2d2d7;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: var(--apple-text);
+            transition: all 0.2s ease;
+            width: 100px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .quantity-input-small:focus {
+            outline: none;
+            border-color: var(--apple-blue);
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+        }
+
+        .quantity-input-small::placeholder {
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        .quantity-empty-state {
+            padding: 16px;
+            text-align: center;
+            color: var(--apple-text-secondary);
+            font-size: 13px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px dashed #d1d5db;
+        }
+
+        .quantity-header {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--apple-text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .so-header {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--apple-text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Input field alignment */
+        .apple-input,
+        .apple-select,
+        .apple-textarea {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Professional Loading Spinner - Single Ring */
+        .apple-spinner {
+            width: 80px;
+            height: 80px;
+            border: 5px solid rgba(0, 113, 227, 0.1);
+            border-top-color: var(--apple-blue);
+            border-right-color: var(--apple-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 20px rgba(0, 113, 227, 0.2);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Pulse animation for loading card */
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 10px 40px rgba(0, 113, 227, 0.1);
+            }
+            50% {
+                box-shadow: 0 15px 50px rgba(0, 113, 227, 0.2);
+            }
+        }
+
+        #loadingOverlay .apple-card {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        /* Loading dots animation */
+        .loading-dots {
+            display: inline-flex;
+            gap: 4px;
+            margin-left: 4px;
+        }
+
+        .loading-dots span {
+            width: 6px;
+            height: 6px;
+            background: var(--apple-blue);
+            border-radius: 50%;
+            display: inline-block;
+            animation: loading-dot 1.4s ease-in-out infinite;
+        }
+
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes loading-dot {
+            0%, 80%, 100% {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+            40% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        /* Button hover effect */
+        .save-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Reset button (red) */
+        .reset-btn {
+            background: var(--apple-red);
+            border-color: var(--apple-red);
+            color: white;
+        }
+
+        .reset-btn:hover {
+            background: #ff1f14;
+            border-color: #ff1f14;
+            box-shadow: 0 8px 20px rgba(255, 59, 48, 0.3);
+        }
+
+        /* Ripple effect */
+        .save-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .save-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Shimmer shine effect */
+        .save-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            transition: left 0.5s;
+        }
+
+        .save-btn:hover::after {
+            left: 100%;
+        }
+
+        .save-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Ensure button content is above pseudo-elements */
+        .save-btn svg,
+        .save-btn .btn-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Success checkmark animation */
+        @keyframes checkmark-draw {
+            0% {
+                stroke-dashoffset: 100;
+            }
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .checkmark {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: checkmark-draw 0.8s ease-out forwards;
+        }
+
+        /* Progress bar animation */
+        .progress-bar {
+            position: relative;
+            transition: width 0.5s ease-out;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            background: linear-gradient(90deg, #3b82f6, #2563eb) !important;
+            overflow: hidden;
+        }
+
+        @keyframes progress-shine {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(200%);
+            }
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.4),
+                transparent
+            );
+            animation: progress-shine 1.5s infinite;
+        }
+
+        /* Modal */
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        #loadingOverlay {
+            z-index: 9999 !important;
+        }
+
+        #loadingOverlay .apple-card {
+            animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.7);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Confirm Modal Animations */
+        .confirm-modal-content {
+            animation: modal-bounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .confirm-icon-container {
+            animation: icon-pop 0.6s ease-out 0.2s both;
+        }
+
+        /* Success Modal Animations */
+        .success-modal-content {
+            animation: modal-bounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes modal-bounce {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.95);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-icon-container {
+            animation: icon-pop 0.6s ease-out 0.3s both;
+            box-shadow: 0 8px 24px rgba(34, 197, 94, 0.2);
+        }
+
+        @keyframes icon-pop {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Notification */
+        .notification {
+            animation: slideInRight 0.3s ease-out forwards;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .data-table {
+                font-size: 13px;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 8px 6px;
+            }
+
+            .apple-input,
+            .apple-select,
+            .apple-textarea {
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Autocomplete Suggestion Box */
+        .autocomplete-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .autocomplete-suggestions.show {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #374151;
+            border-bottom: 1px solid #f3f4f6;
+            transition: background-color 0.15s ease;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover,
+        .autocomplete-item.active {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .autocomplete-item mark {
+            background: #fef3c7;
+            color: #92400e;
+            font-weight: 600;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        .autocomplete-no-results {
+            padding: 14px;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        /* Reset Machine Button */
+        .reset-machine-btn {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 26px;
+            height: 26px;
+            background: rgba(220, 38, 38, 0.85);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+            opacity: 0.7;
+            z-index: 5;
+        }
+
+        .reset-machine-btn:hover {
+            background: rgba(220, 38, 38, 1);
+            opacity: 1;
+            transform: scale(1.05);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .reset-machine-btn:active {
+            transform: scale(0.95);
+        }
+
+        .reset-machine-btn svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        .time-cell-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .time-cell-wrapper .flex {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-[env(safe-area-inset-bottom,0)]">
+    <!-- Header Section -->
+    <header class="apple-header sticky top-0 z-40 px-4 py-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="apple-card p-6">
+                <div class="text-center mb-4">
+                    <h1 class="text-2xl md:text-3xl font-semibold text-gray-900 tracking-tight">
+                        ระบบบันทึกยอดพิมพ์ PD3
+                    </h1>
+                    <p class="text-gray-500 mt-1">Production Recording System</p>
+                </div>
+                
+                <!-- Status Bar -->
+                <div class="flex flex-wrap items-center justify-center gap-6 mt-5">
+                    <!-- System Status -->
+                    <div class="status-badge status-online">
+                        <span class="status-dot"></span>
+                        <span>พร้อมใช้งาน</span>
+                    </div>
+                    
+                    <!-- Current Time -->
+                    <div class="time-display">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span id="currentTime" class="time-value"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <!-- ชุดข้อมูลกะ A -->
+        <div class="apple-card p-6 mb-6 animate-fade-in">
+            <div class="section-header">
+                <div class="section-badge badge-shift-a">A</div>
+                <div>
+                    <h2 class="text-2xl font-semibold text-gray-900">ชุดข้อมูลกะ A</h2>
+                    <p class="text-gray-500 text-sm"></p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <tbody id="shiftA_tbody">
+                        <!-- 14 rows (7 PT × 2 rows each) -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ชุดข้อมูลกะ B -->
+        <div class="apple-card p-6 mb-6 animate-fade-in" style="animation-delay: 0.1s;">
+            <div class="section-header">
+                <div class="section-badge badge-shift-b">B</div>
+                <div>
+                    <h2 class="text-2xl font-semibold text-gray-900">ชุดข้อมูลกะ B</h2>
+                    <p class="text-gray-500 text-sm"></p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <tbody id="shiftB_tbody">
+                        <!-- 14 rows (7 PT × 2 rows each) -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="apple-card premium-glow p-6">
+            <div class="flex flex-wrap gap-3 justify-center">
+                <button onclick="submitData()" class="apple-btn apple-btn-primary text-lg px-8 py-4 save-btn">
+                    <span class="btn-text">บันทึกข้อมูล</span>
+                </button>
+                
+                <button onclick="resetSystem()" class="apple-btn text-lg px-8 py-4 save-btn reset-btn">
+                    <span class="btn-text">รีเซ็ตระบบ</span>
+                </button>
+                
+                <button onclick="window.location.href='dashboard.html'" class="apple-btn apple-btn-primary text-lg px-8 py-4 save-btn" style="background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);">
+                    <span class="btn-text">DASHBOARD</span>
+                </button>
+
+            </div>
+            
+            <!-- พื้นที่แสดงลิงก์ Google Sheet -->
+            <div id="sheetLinkContainer" class="hidden mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <p class="text-sm text-green-800 mb-2">✅ บันทึกสำเร็จ! เปิด Google Sheet:</p>
+                <a id="sheetLink" href="#" target="_blank" class="text-blue-600 hover:text-blue-800 underline text-sm font-medium break-all"></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 modal-backdrop hidden z-[9998] flex items-center justify-center p-4">
+        <div class="apple-card w-full max-w-md p-8 success-modal-content">
+            <div class="text-center">
+                <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-green-100 to-green-50 rounded-full flex items-center justify-center success-icon-container">
+                    <svg class="w-12 h-12 text-green-500 checkmark" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-semibold text-gray-900 mb-2">บันทึกข้อมูลสำเร็จ</h3>
+                <p class="text-gray-600 mb-6">ข้อมูลถูกบันทึกเรียบร้อยแล้ว</p>
+                
+                <button onclick="closeSuccessModal()" class="apple-btn apple-btn-success w-full">
+                    เสร็จสิ้น
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 modal-backdrop hidden flex items-center justify-center" style="z-index: 9999;">
+        <div class="apple-card p-10 text-center" style="min-width: 360px; max-width: 400px;">
+            <div class="apple-spinner mx-auto mb-6"></div>
+            <h3 class="text-2xl font-semibold text-gray-900 mb-3">
+                กำลังบันทึกข้อมูล
+                <span class="loading-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+            </h3>
+            <p class="text-gray-600 text-base mb-4" id="loadingStatus">กำลังเตรียมข้อมูล...</p>
+            
+            <!-- Progress bar -->
+            <div class="w-full bg-gray-200 rounded-full h-2 mb-4 overflow-hidden">
+                <div class="progress-bar h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full" style="width: 0%"></div>
+            </div>
+            
+            <div class="text-sm text-gray-500">
+                <svg class="w-5 h-5 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                </svg>
+                โปรดรอสักครู่...
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirmModal" class="fixed inset-0 modal-backdrop hidden flex items-center justify-center" style="z-index: 10000;">
+        <div class="apple-card p-10 text-center confirm-modal-content" style="min-width: 400px; max-width: 500px;">
+            <div class="confirm-icon-container mx-auto mb-6 w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center">
+                <svg class="w-12 h-12 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            </div>
+            <h3 class="text-2xl font-semibold text-gray-900 mb-3" id="confirmTitle">ยืนยันการดำเนินการ</h3>
+            <p class="text-gray-600 mb-8 text-base" id="confirmMessage">คุณแน่ใจหรือไม่?</p>
+            
+            <div class="flex gap-3">
+                <button onclick="closeConfirmModal(false)" class="flex-1 apple-btn text-lg px-6 py-3 save-btn" style="background: #6b7280; border-color: #6b7280; color: white;">
+                    <span class="btn-text">ยกเลิก</span>
+                </button>
+                <button onclick="closeConfirmModal(true)" class="flex-1 apple-btn text-lg px-6 py-3 save-btn" style="background: var(--apple-red); border-color: var(--apple-red); color: white;">
+                    <span class="btn-text">ยืนยัน</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Container -->
+    <div id="notifications" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <script>
+        // ==========================================
+        // Google Apps Script Configuration
+        // ==========================================
+        const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbztZP1kcjxkc9ErzXstS5sQ9KEGyXDM4GK77AV7LYFrTMcdRIyLEzFQs5D6EQOBwMq-gQ/exec';
+        
+        // ==========================================
+        // Master Data
+        // ==========================================
+        const ptMachines = ["1", "2", "3", "4", "8", "9", "10"];
+        
+        const brands = [
+            " NB FISH103L",
+            " สไมล์951M ",
+            " เบทาโกร 124",
+            " เบทาโกร 124 ",
+            " เบทาโกร 213",
+            " เบทาโกร 321B ",
+            " เบทาโกร 322 ",
+            " เบทาโกร 323 ",
+            "007",
+            "21",
+            "331",
+            "39",
+            "551",
+            "575",
+            "578",
+            "8S",
+            "913",
+            "915",
+            "915 พี",
+            "915 เอ็ม",
+            "915 เอ็ม ",
+            "917",
+            "918",
+            "918 พี",
+            "918พี",
+            "931",
+            "932",
+            "935",
+            "935 เอ",
+            "935 เอ็ม",
+            "935 แอล",
+            "935A",
+            "935L",
+            "935เอ",
+            "935แอล",
+            "937",
+            "952",
+            "952 เอส",
+            "952A",
+            "953",
+            "953 เอส",
+            "954 แอล",
+            "956",
+            "957",
+            "958",
+            "959",
+            "964",
+            "966",
+            "968",
+            "969",
+            "981",
+            "997",
+            "A.C.C.ภาษาอังกฤษ",
+            "A.C.C.ภาษาอังกฤษ ",
+            "A.C.C.ภาษาอังกฤษ 8-118",
+            "APM 564S",
+            "APM 914",
+            "APM915",
+            "B Soy Digest",
+            "B Soy Digest กลาง",
+            "B922",
+            "BALL CLAY PC(ถุงในดำ)",
+            "BLANK FORM",
+            "BLANK FORM(ถุงในดำ)",
+            "BOBBI Cat รสMellow",
+            "BOBBI Cat รสSalman",
+            "BOBBI Dog รส Lamb&Rice ",
+            "BOBBL Cat รสMellow",
+            "BOBBL Cat รสSalman",
+            "BOBBL Dog รส Lamb&Rice ",
+            "BS",
+            "BS(2หน้า)",
+            "BS(แต้มฟ้า)",
+            "Blue for Refine sugar",
+            "CCK18",
+            "CHEMEMAN CAL100 50KG(ฟ้า)",
+            "CHEMEMAN CAL100 50kg.(ฟ้า)",
+            "CHMEMAN Quicklime 25kg.",
+            "EXCELBLEND S200",
+            "EXCELBLEND S50(ถุงในดำ)",
+            "FELDSPAR K200BL",
+            "FELDSPAR N15",
+            "FELDSPAR N325-GBL",
+            "FELDSPAR SP SPAR A",
+            "FISH MEAL MARIN TRUST",
+            "FW-Y",
+            "Golden Granulated Sugar",
+            "Green for white sugar",
+            "HARD FLOUR",
+            "HERO 111",
+            "High Rock",
+            "ITE ปูนเปลือกหอย",
+            "ITEปูนเปลือกหอย",
+            "JET 002",
+            "JET 153",
+            "JET 180",
+            "JET 304",
+            "JET 333",
+            "JET 405 โปรตีน 16%",
+            "JET 405 โปรตีน 18%",
+            "JET 405โปรตีน 18%",
+            "JET 405โปรตีน16%",
+            "JET 405โปรตีน18%",
+            "JET 444",
+            "JET 555",
+            "JET 888",
+            "JET153",
+            "JET405 โปรตีน18%",
+            "JET405โปรตีน16%",
+            "JET405โปรตีน18%",
+            "JET555",
+            "KFM",
+            "KFM HF",
+            "KFM-HF",
+            "KPN 25kg.Taiwan",
+            "LMC 20 kg",
+            "LMC 20KG",
+            "LMC 20kg",
+            "LUNG SHIN 12 KG.",
+            "LUNG SHIN 12 kg",
+            "LUNG SHIN 12Kg",
+            "LUNG SHIN 12Kg.",
+            "LUNG SHIN 12kg",
+            "LUNG SHIN 30 KG.",
+            "LUNG SHIN 30 kg",
+            "LUNG SHIN 30Kg",
+            "LUNG SHIN 30Kg.",
+            "LUNG SHIN 30kg",
+            "LUNG SHIN ข้าวหอมไทย 30 kg",
+            "LUNG SHIN ข้าวหอมไทย 30Kg",
+            "MASTER  CHEF",
+            "MASTER CHEF",
+            "NB FISH 103L",
+            "NB FISH 202",
+            "NB FISH103L",
+            "NB FISH202",
+            "NB Proplus 888M",
+            "NHR-1",
+            "NOVA D18",
+            "NOVA L18",
+            "NOVA S2",
+            "NOVA S3",
+            "NOVA S5",
+            "OPAL CA3",
+            "OPAL CA3(ถุงในดำ)",
+            "PBKF-01-03",
+            "PBKF1-01-03",
+            "PBKF2-01-03",
+            "PCS21%",
+            "PORTARYTE",
+            "PORTARYTE B15",
+            "R FEED 405A",
+            "Rocky Quick Lime",
+            "Rocky Quick lime",
+            "Rocky quick lime",
+            "SD GOAT",
+            "SILICA",
+            "SILICA 325BL",
+            "SPEED PLUS 003เขมร",
+            "SPEED PLUS 111 ลาว",
+            "SPEED PLUS 111 เขมร",
+            "SPEED PLUS 222 ลาว",
+            "SPEED PLUS 222 เขมร",
+            "SPEED PLUS 222ลาว",
+            "SPEED PLUS 333 ลาว",
+            "SPEED PLUS 333 เขมร",
+            "SPEED PLUS 333ลาว",
+            "SPEED PLUS 405ENG",
+            "SPEED PLUS 444 ลาว",
+            "SPEED PLUS 444เขมร",
+            "SPEED PLUS 888ENG",
+            "SPEED PLUS 999 ENG",
+            "SPM 202",
+            "SPM 212",
+            "SPM 312",
+            "SPM 4031",
+            "SPM 4132",
+            "SPM 912",
+            "SPM 914",
+            "SPM 915",
+            "SPM190 GOAL",
+            "SPM190GOAL",
+            "SPM195 GOAL",
+            "SPM312",
+            "SPM4132",
+            "SPM914",
+            "SW 441",
+            "SW 441 ",
+            "SW 441 PLUS",
+            "SW 454",
+            "SW441",
+            "SW441 ",
+            "Soybean Meal",
+            "TBCC",
+            "TRJ",
+            "TUNA MEAL MARIN TRUST",
+            "U-FEED U2(เอส)",
+            "U-FEED U4(เอส)",
+            "U-GOAT14",
+            "VC 100",
+            "VC 105",
+            "VC 108",
+            "VC 120",
+            "VC 181",
+            "VC 193",
+            "VC100",
+            "VC108",
+            "VC120",
+            "VC181",
+            "VC193",
+            "W30",
+            "WB บาลานส์ 910 30kg LP",
+            "WB บาลานส์ 924 30kg NM",
+            "WB บาลานส์ 926 30kg LP",
+            "WB บาลานส์ 952 30kg LP",
+            "WB บาลานส์ 952 30kg NM",
+            "WB บาลานส์ 953 30kg LP",
+            "WB บาลานส์ 953 30kg NM",
+            "WB บาลานส์ 956 30kg LP",
+            "WB ฟาร์ม F911 30kg.",
+            "WB ฟาร์ม F912 30kg LP",
+            "WB ฟาร์ม F914M 30kg ",
+            "WB ฟาร์ม F914M 30kg  NM",
+            "WB ฟาร์ม F914M 30kg NM",
+            "WB ฟาร์ม F914M 30kg.",
+            "WB ฟาร์ม F914M 30kg.NM",
+            "WB ฟาร์ม F916 30kg ",
+            "WB ฟาร์ม F916 30kg LP",
+            "WB ฟาร์ม F916M 30kg",
+            "WB ฟาร์ม F916M 30kg ",
+            "WB ฟาร์ม F931L 30kg",
+            "WB ฟาร์ม F931L 30kg ",
+            "WB ฟาร์ม F932 30kg ",
+            "WB ฟาร์ม F932 30kg.LP",
+            "WB ฟาร์ม F933 30kg",
+            "WB ฟาร์ม F936 30kg",
+            "WB ฟาร์ม F936 30kg ",
+            "WB ฟาร์ม F937 30kg ",
+            "WB ฟาร์ม F992 30kg LP",
+            "WB ฟาร์ม F992 30kg LR",
+            "WB ฟาร์ม F993 30kg  LR",
+            "WB ฟาร์ม F993 30kg LP",
+            "WB ฟาร์ม F993 30kg LR",
+            "WB ฟาร์ม F993L 30kg  LR",
+            "WB มาสเตอร์ 5510 30kg LP",
+            "WB เบทาโกร 106 30kg LP",
+            "WB เบทาโกร 124 30kg NM",
+            "WB เบทาโกร 223 30kg LP",
+            "WB เบทาโกร 223F 30kg SK",
+            "WB เบทาโกร 224 30kg LP",
+            "WB เบทาโกร 224F 30kg",
+            "WB เบทาโกร 224F 30kg SK",
+            "WB เบทาโกร 225 30kg LP",
+            "WB เบทาโกร 322 30kg LP",
+            "WB เบทาโกร 323 30kg LP",
+            "WB เบทาโกร 323 30kg NM",
+            "WB เบทาโกร 326 30kg LP",
+            "WB เบทาโกร 326 30kg NM",
+            "WB เบทาโกร 405 30kg LP",
+            "WB เบทาโกร 405 30kg NM",
+            "WB/OC แถบชมพู",
+            "WB/OC แถบฟ้า",
+            "WB/OC แถบเขียว",
+            "WB/OC แถบเหลืองส้ม",
+            "WHOLE WHEAT",
+            "Y30",
+            "YUENYONG",
+            "YUNGYONG",
+            "Zhejiang UN",
+            "กรุงเทพมหานคร",
+            "กล้วยหอม",
+            "กองเมล็ดพันธุ์ข้าว",
+            "กัสโซ่ 202",
+            "กัสโซ่202",
+            "กัสโซ่ฟีด 101-102",
+            "กัสโซ่ฟีด 103SML",
+            "กัสโซ่ฟีด 202",
+            "กัสโซ่ฟีด101-102",
+            "การ์เซียส์ฟิช 111",
+            "การ์เซียส์ฟิช 111M",
+            "การ์เซียส์ฟิช 112",
+            "การ์เซียส์ฟิช 113",
+            "การ์เซียส์ฟิช 411M",
+            "การ์เซียส์ฟิช111",
+            "การ์เซียส์ฟิช111M",
+            "การ์เซียส์ฟิช411M",
+            "กินรี",
+            "กุ้งปลา",
+            "กุ้งแดง",
+            "ขุนศึกเบอร์ 1",
+            "ขุนศึกเบอร์ 2",
+            "ข้าวหอมมะลิสร้อยฟ้า",
+            "ข้าวเปลือกไก่ชน",
+            "จิ้งหรีด ดี1",
+            "ฉัตรทอง(บานเย็น)  ",
+            "ฉัตรทอง(ฟ้า)   ",
+            "ฉัตรทอง(เหลือง)  ",
+            "ฉัตรทอง(แดง) ",
+            "ชวนชม(บานเย็น)",
+            "ชามแดง",
+            "ชามแดง  ",
+            "ชามแดง 25กก",
+            "ชามแดง 25กก.",
+            "ชาวนาข้าวรวงทอง",
+            "ชุนฮั้ว",
+            "ช้างจีนข้าวหอมชั้นดี(น้ำเงิน) (ถุงในเจาะรู)",
+            "ช้างจีนข้าวหอมชั้นดี(น้ำเงิน)(ถุงในเจาะรู)",
+            "ช้างจีนข้าวหอมชั้นดี(แดง)",
+            "ช้างเผือก",
+            "ดวงใจ(ชมพู-ม่วง)",
+            "ดวงใจ-ชมพู(ม่วง)",
+            "ดอกไม้ม่วง",
+            "ดอกไม้เขียว",
+            "ดอกไม้เหลือง",
+            "ดอกไม้แดง",
+            "ดาว 20 กก.",
+            "ด็อกเตอร์ฮิวมิค ฟลูวิค",
+            "ถังข้าวทอง(ฟ้า)",
+            "ถังข้าวทอง(เขียวอ่อน)",
+            "ถุงขียว",
+            "ถุงชมพู",
+            "ถุงชมพู(คัดพิเศษ)",
+            "ถุงถุงม่วง(คัดพิเศษ)",
+            "ถุงทองแซนวิช",
+            "ถุงน้ำตาล(คัดพิเศษ)",
+            "ถุงฟ้า(คัดพิเศษ)",
+            "ถุงม่วง",
+            "ถุงม่วง (เกรดพรีเมี่ยม)",
+            "ถุงม่วง(คัดพิเศษ)",
+            "ถุงม่วง(พรีเมี่ยม)",
+            "ถุงม่วง(เกรดพรีเมี่ยม)",
+            "ถุงเขียว",
+            "ถุงเขียว (เกรดพรีเมี่ยม)",
+            "ถุงเขียว(คัดพิเศษ)",
+            "ถุงเขียว(พรีเมี่ยม)",
+            "ถุงเขียว(เกรดพรีเมี่ยม)",
+            "ถุงเขียา",
+            "ถุงเงิน",
+            "ทองทั้งทุ่ง",
+            "ธ.เมล็ดพันธุ์ข้าวชุมชน ตำบลหนองกะปุ",
+            "นกทอง",
+            "นาโน 01",
+            "นาโน 01 พลัส",
+            "นาโน 02",
+            "นาโน 03",
+            "นาโน 04",
+            "นาโน เอ็นบี 03",
+            "นาโน เอ็มบี 03",
+            "นาโน แอล 04",
+            "นิค 001",
+            "นิค 101S",
+            "นิค 102B",
+            "นิค 103A",
+            "นิค 103B",
+            "นิค103B",
+            "นีโอ 05",
+            "นีโอ ดี03",
+            "นีโอ ดีอาร์ 00",
+            "นีโอ ดีอาร์ 03",
+            "นีโอ พี06",
+            "นีโอ พี2",
+            "นีโอ พี2(เอส)",
+            "นีโอ พี3",
+            "นีโอ พี4(เอส)",
+            "นีโอ พี6",
+            "นีโอ เอ็นบี 02",
+            "นีโอดี 03",
+            "น้องเอินโดนัท 10กก",
+            "บลูทีมเหลือง",
+            "บลูทีมแดง",
+            "บะหมีเตี๊ยว",
+            "บะหมี่เตี๊ยว",
+            "บะหมี่เตี๋ยว",
+            "บะหมี่ไข่คุณภาพดี",
+            "บาลานส์ 924",
+            "บาลานส์ 945",
+            "บาลานส์ 953",
+            "บาลานส์ 956",
+            "บาลานส์ 957",
+            "ปลาวาฬยิ้ม",
+            "ปลาโลมาทอง",
+            "ปลาโลมาเขียว",
+            "ปลาโลมาเทา",
+            "ปลาโลมาแดง",
+            "ปลาโลมาแดง ",
+            "ปาท่องโก๋",
+            "ปูนเปลือกหอย",
+            "ผึ้งชมพู",
+            "ผึ้งเหลือง",
+            "พ.ม.21 ผงใช้ในฟาร์ม(แถบบานเย็น)",
+            "พระอาทิตย์",
+            "พระเอกในดวงใจ 14-7-28",
+            "พร้อมชน 25 กก.(เขียว)",
+            "พิมพ์น้ำเงิน",
+            "พิมพ์ส้ม",
+            "พี-มินเนอร์ นิวพลัส",
+            "ฟิน โกลด์ 666",
+            "ฟิน โกลด์ 999",
+            "ฟิล กู๊ด 802",
+            "ฟิล กู๊ด 891",
+            "ฟิล กู๊ด 892",
+            "ฟิล กู๊ด 893",
+            "ฟิล กู๊ด พี1 เอฟ",
+            "ฟิล กู๊ด พี2",
+            "ฟิล กู๊ด พี3",
+            "ฟิล กู๊ด พี4",
+            "ฟิล กู๊ด พี6",
+            "ฟิลกู๊ด พี3",
+            "ฟิลกู๊ด พี6",
+            "ฟีล กู๊ด 801",
+            "ฟีล กู๊ด 802",
+            "ฟีล กู๊ด 8031",
+            "ฟีล กู๊ด 8032",
+            "ฟีล กู๊ด 8033",
+            "ฟีล กู๊ด 8131",
+            "ฟีล กู๊ด 8132",
+            "ฟีล กู๊ด 8133",
+            "ฟีล กู๊ด 821",
+            "ฟีล กู๊ด 822",
+            "ฟีล กู๊ด 892",
+            "ฟีล กู๊ด 893",
+            "ฟีล กู๊ด พี05",
+            "ฟีล กู๊ด พี07",
+            "ฟีล กู๊ด พี1เอฟ",
+            "ฟีล กู๊ด พี4",
+            "ฟีล กู๊ด พี5",
+            "ฟีล กู๊ด พี6",
+            "ฟีล กู๊ด พี7",
+            "ฟีล-กู๊ด พี6",
+            "มังกรฟ้า MTS",
+            "มังกรฟ้าMTS",
+            "มังกรส้ม MTS",
+            "มังกรส้มMTS",
+            "มังกรเขียว MTS",
+            "มังกรเขียวMTS",
+            "มังกรเหลือง MTS",
+            "มังกรเหลืองMTS",
+            "มังกรแดง STCB",
+            "มาซู ฟีดซี 0433",
+            "มาซู ฟีดซี042",
+            "มาซู ฟีดบี042",
+            "มาซู ฟีดบี0434",
+            "มาซู ฟีดพี040",
+            "มาซูฟีด จี041",
+            "มาซูฟีด ซี042",
+            "มาซูฟีด ซี0434",
+            "มาซูฟีด บี041",
+            "มาซูฟีด บี0434",
+            "มาซูฟีด พี040",
+            "มาซูฟีดบี 0434",
+            "มาสเตอร์ 5524",
+            "มาสเตอร์ 5556",
+            "ยู-ฟีด ดี3",
+            "ยู-ฟีด บี1",
+            "ยู-ฟีด บี2",
+            "ยู-ฟีด รวมหมู",
+            "ยูนิคอร์นฟิช 101-102",
+            "ยูนิคอร์นฟิช 103",
+            "ยูนิคอร์นฟิช101-102",
+            "ยูนิคอร์นฟิช103",
+            "ยูนิคอร์นฟิช202",
+            "ยูนิคอร์นฟิช401M",
+            "ยูนิคอร์นฟีช 101-102",
+            "ยูนิคอร์นฟีช 202",
+            "ยูนิคอร์นฟีช101-102",
+            "ยูฟีด ดี3",
+            "รถไฟฟ้า",
+            "รถไฟฟ้าปูนขาวเย็น",
+            "รวงข้าวส้ม",
+            "รวงข้าวเหลือง",
+            "รอแบบ",
+            "ราชสีห์ ข้าวคัดพิเศษ",
+            "ราชสีห์(ข้าวหอมมะลิ)",
+            "ราชสีห์ข้าวคัดพิเศษ",
+            "ราชสีห์ข้าวหอมมะลิ",
+            "ราชสีห์ยี่จ้อหอมมะลิ",
+            "ราชาหมอนทอง",
+            "ลุงนัย ฟาร์ม 101",
+            "ลุงนัย ฟาร์ม 102",
+            "ลุงนัย ฟาร์ม 103",
+            "ลุงนัย ฟาร์ม 103พลัส",
+            "ลุงนัย ฟาร์ม 104",
+            "ลุงนัย ฟาร์ม102",
+            "ลุงนัย ฟาร์ม104",
+            "ลูกโลก AMPC",
+            "วายุภักษ์",
+            "วี-ฟีด วี 01",
+            "วี-ฟีด วี 02",
+            "วี-ฟีด วี 03",
+            "วี-ฟีด วี 04",
+            "วี-ฟีด วี 05",
+            "วี-ฟีด วี 06",
+            "วี-ฟีด วี 07",
+            "วี-ฟีด วี02",
+            "วี-ฟีด วี03",
+            "วี-ฟีด วี18",
+            "วี-ฟีด วี22",
+            "วีฟีด วี14",
+            "วีโว่ 100",
+            "วีโว่ 200",
+            "วีโว่ 300",
+            "วีโว่ 400",
+            "วีโว่200",
+            "วีโว่300",
+            "วีโว่400",
+            "ศรีนครพันธุ์ข้าว",
+            "ส.กิจเจริญพันธุ์ข้าว",
+            "สุบรรณ 111",
+            "สุบรรณ 222",
+            "สุบรรณ 333",
+            "สุบรรณ 444",
+            "สุบรรณ 666",
+            "หนุมาน PSCS",
+            "หนุมานเทอร์โบ",
+            "หมูแดง 002",
+            "หลอดไฟ 20กก.",
+            "หลอดไฟ 50กก",
+            "หลอดไฟ 50กก.",
+            "หัวสิงห์ข้าวเหลืองประทิว",
+            "หีบเพลงฟ้า",
+            "หีบเพลงเหลือง",
+            "หีบเพลงแดง",
+            "องุ่น",
+            "อนนท์ 20 กก.",
+            "อนนท์ 50กก.",
+            "อาทิตย์อุทัย",
+            "เกลือตรามือ 10กก.",
+            "เกษตรสุริยา(แดง)",
+            "เคเอ็ม",
+            "เบทาโกร +",
+            "เบทาโกร 124",
+            "เบทาโกร 321B",
+            "เบทาโกร 322",
+            "เบทาโกร 323",
+            "เบทาโกร 323 ",
+            "เบทาโกร 324",
+            "เบทาโกร 325",
+            "เบทาโกร 326",
+            "เบทาโกร 327",
+            "เบทาโกร 401",
+            "เบทาโกร 402",
+            "เบทาโกร 403",
+            "เบทาโกร 405",
+            "เบทาโกร 406",
+            "เบส-มิน",
+            "เป็ด",
+            "เพชร",
+            "เพอเฟคค 664",
+            "เพอเฟคค 664HP",
+            "เพอเฟคค์ 000",
+            "เพอเฟคค์ 102Sโกลด์",
+            "เพอเฟคค์ 103Pโกลด์",
+            "เพอเฟคค์ 104 โกลด์",
+            "เพอเฟคค์ 104Sโกลด์",
+            "เพอเฟคค์ 104โกลด์",
+            "เพอเฟคค์ 663",
+            "เพอเฟคค์ 664",
+            "เพอเฟคค์ 664 ",
+            "เพอเฟคค์ 664 HP",
+            "เพอเฟคค์ 664HP",
+            "เพอเฟคค์ 902",
+            "เพอเฟคค์ 903",
+            "เพอเฟคค์ 911",
+            "เพอเฟคค์ 912",
+            "เพอเฟคค์ 913",
+            "เพอเฟคค์ 914",
+            "เพอเฟคค์ 916",
+            "เพอเฟคค์ 917",
+            "เพอเฟคค์103P โกลด์",
+            "เพอเฟคค์103S โกลด์",
+            "เพอเฟคค์104 โกลด์",
+            "เพอเฟคค์104S",
+            "เพอเฟคค์104S โกลด์",
+            "เพอเฟคค์203P",
+            "เพอเฟคค์204S ",
+            "เพอเฟคค์204S โกลด์",
+            "เพอเฟคค์663",
+            "เพอเฟคค์664HP",
+            "เพอเฟคค์911",
+            "เพอเฟคค์912",
+            "เพื่อนเกษตร 2001",
+            "เฟิร์สคลาส 902",
+            "เฟิร์สคลาส 903",
+            "เฟิร์สคลาส 911",
+            "เฟิร์สคลาส 912",
+            "เฟิร์สคลาส 913",
+            "เฟิร์สช้อย 902",
+            "เฟิร์สช้อย 911",
+            "เฟิร์สช้อย 912",
+            "เฟิร์สช้อย 913",
+            "เฟิร์สช้อย 914",
+            "เฟิร์สช้อย 915",
+            "เมล็ดพันธุ์ข้าว",
+            "เมอรี่ 882S",
+            "เมอร์รี่ 882L",
+            "เมอร์รี่ 882M",
+            "เมอร์รี่ 882S",
+            "เมอร์รี่ 9911S",
+            "เมอร์รี่ 9912M",
+            "เมอร์รี่ 9913L",
+            "เมอร์รี่882L",
+            "เมอร์รี่882M",
+            "เมอร์รี่882M ",
+            "เมอร์รี่882S",
+            "เมืองเหน่อ",
+            "เลิฟชอยล์ 14-3-3",
+            "เลิฟชอยล์18-3-10",
+            "เลิฟซอยล์26-6-6",
+            "เวท-มิน",
+            "เสือ",
+            "เอส ฟาร์ม105",
+            "เอส ฟาร์ม115",
+            "เอส ฟาร์ม190",
+            "เอ็มเค 912W",
+            "เอ็มเค 914",
+            "แชมป์เปี้ยนเขียว",
+            "แชมป์เปี้ยนเหลือง",
+            "แช้มป์เปี้ยนเหลือง",
+            "แดนโกร20(เขียวเข้ม)",
+            "แดนโกรว 10P-L",
+            "แดนโกรว 30",
+            "แดนโกรว 50",
+            "แดนโกรว เจลาโต้",
+            "แดนโกรว10P-L",
+            "แดนโกรว20(เขียวเข้ม)",
+            "แดนโกรว30(ส้ม)",
+            "แดนโกรว50(เหลือง)",
+            "แดนโกรวบรีดเดอร์ 60",
+            "แดนโกรวบรีดเดอร์ 70",
+            "แดนโกรวบรีดเดอร์ 80",
+            "แดนโกรวบรีดเดอร์60",
+            "แดนโกรวบรีดเดอร์70",
+            "แดนโกรวบรีดเดอร์70 ",
+            "แดนโกรวบรีดเดอร์80",
+            "แดนโกรวเจลาโต้(ฟ้า)",
+            "แต้มทอง",
+            "แต้มฟ้า",
+            "แต้มเขียว",
+            "แต้มแดง",
+            "แต้้มแดง",
+            "แถบฟ้า ภาษาอังกฤษ S-44(เย็บวนปาก)",
+            "แถบส้ม",
+            "แถบเขียว",
+            "แปดแต้มส้ม",
+            "แปดแต้มแดง",
+            "แปดแต้มแดง  ",
+            "แปดแต้มแดง 25กก",
+            "แปดแต้มแดง 25กก.",
+            "แป้งมันซุปเปอร์ไฮเกรด(ถุงในเจาะรู)",
+            "แป้งมันหมัก(ม่วง)(ถุงในเจาะรู)",
+            "แป้งมันไก่เหลืองMTS(ถุงในเจาะรู)",
+            "แป้งสาลีพรีเมี่ยม",
+            "แป้งหมักไก่แดง MTS(ถุงในเจาะรู)",
+            "แป้งหมักไก่แดงMTS(ถุงในเจาะรู)",
+            "โกลด์ชิคเก้น 994",
+            "โดนัทแฟนฉัน 10กก",
+            "โนวา เอ็น 14",
+            "โนวา เอ็ม 14",
+            "โนวา แอล 16",
+            "โบว์น้ำเงิน",
+            "โบว์น้ำเงิน   ",
+            "โบว์น้ำเงิน 10กก",
+            "โบว์น้ำเงิน 10กก.",
+            "โบว์แดง",
+            "โบว์แดง ",
+            "โบว์แดง  ",
+            "โบว์แดง 10กก",
+            "โบว์แดง 10กก.",
+            "โพสพผลเจริญดี",
+            "โมโม่ 401",
+            "โมโม่ 402",
+            "โมโม่ 402โกล",
+            "โมโม่ 4131",
+            "โมโม่ 4132",
+            "โมโม่ 4133",
+            "โมโม่ 421",
+            "โมโม่ 422",
+            "โมโม่ 491",
+            "โมโม่ 492",
+            "โมโม่4132",
+            "โลลิโก้",
+            "โอดิน 101",
+            "โอดิน 103L",
+            "โอดิน 103M",
+            "โอดิน 202",
+            "โอดิน 555",
+            "โอดินฟีด402",
+            "โอดินฟีด888",
+            "ใบมัน",
+            "ใบเตย",
+            "ไก่ชน",
+            "ไก่ดาว",
+            "ไก่เนื้อ  ",
+            "ไก่เนื้อ   ",
+            "ไก่เนื้อ สระบุรี1",
+            "ไก่เนื้อ สระบุรี2",
+            "ไก่เนื้อ เบอร์1",
+            "ไก่เนื้อ เบอร์2",
+            "ไก่เยียบศรกบินทร์",
+            "ไก่เหยียบศร ศรีวรรณ 25 กก.",
+            "ไก่เหยียบศร แสงสิริ",
+            "ไก่เหยียบศรกบินทร์ ",
+            "ไก่เหยียบศรีวรรณ",
+            "ไก่เหยียบศรแสงสิริ",
+            "ไก่ไข่",
+            "ไก่ไข่ บ่อทอง",
+            "ไก่ไข่เบอร์ 5 เอ็ม",
+            "ไดแคลเซียม",
+            "ไพลิน",
+            "ไม่พิมพ์",
+            "ไลค์ฟีด 405",
+            "ไลด์ฟีด 405",
+            "ไอฟีดสุกร เบอร์ 2",
+            "ไอฟีดสุกร เบอร์2 ",
+            "ไอฟีดเป็ดเนื้อเบอร์ 2",
+            "ไอฟีดเป็ดไข่เบอร์ 5 ",
+            "ไอฟีดเป็ดไข่เบอร์ 5 เอ",
+            "ไอฟีดไก่ไข่เบอร์ 5",
+            "ไอฟีดไก่ไข่เบอร์ 5 พี",
+            "ไอฟีดไก่ไข่เบอร์ 5 เอ็ม",
+            "ไอฟีดไก่ไข่เบอร์ 5พี",
+            "ไอฟีดไก่ไข่เบอร์ 5เอ็ม",
+            "ไอฟีด วันออกศึก เบอร์2",
+            "ไอฟีด วันออกศึก เบอร์3",
+            "ไอฟีดนกกระทา เบอร์ 7",
+            "PORTARYTE C15",
+            "QUARTZ 325BL",
+            "SILICA P325",
+            "CHEMEMAN Quicklime 25kg(ส้ม)",
+            "Rocky Quick Lime",
+            "อะมิโนก้า 25 กก.",
+            "ยูฟีด รวมไก่ วัว",
+            "ฟีล กู๊ด8133",
+            "มาซู ฟีดบี0432",
+            "มาซู ฟีดจี041",
+            "มาซูฟีด ซี041",
+            "วัวแดง K We12",
+            "วัวแดง K We14",
+            "U-FEED U4(เอส) ",
+            "0",
+        ];
+        
+        const employees = [
+            { "id": "ZP9371", "name": "นาย ภาณุมาส คงอินทร์" },
+            { "id": "ZP9450", "name": "นาย อำนวย บูชาบุญ" },
+            { "id": "ZP91788", "name": "นาย เปลใส อายะนะบุตร" },
+            { "id": "ZP91809", "name": "นาย มานิต ตะพัง" },
+            { "id": "ZP91827", "name": "นาย ชาญชัย หุ่นคล้าย" },
+            { "id": "ZP91854", "name": "นาย จอ ลิน เท็ท" },
+            { "id": "ZP92015", "name": "นาย วรวัฒน์ เตโช" },
+            { "id": "ZP92093", "name": "นาย ชินกร หวังหมู่กลาง" },
+            { "id": "ZP92261", "name": "นาย มิว" },
+            { "id": "ZP92273", "name": "นาย เฮน ซอ โทน" },
+            { "id": "ZP92291", "name": "นาย วรยศ เฮงนิรันดร์" },
+            { "id": "ZP92329", "name": "นาย มิน ไท อู" },
+            { "id": "ZP92345", "name": "นาย นู นู" },
+            { "id": "ZP92362", "name": "นาย แต๊ะ ลุย อู" },
+            { "id": "ZP92365", "name": "นาย ธเนศ รักภูมิ" },
+            { "id": "ZP92382", "name": "นาย อ่อง จี มิว" },
+            { "id": "ZP92403", "name": "นางสาว เจนจิรา บวชชี" },
+            { "id": "ZP92404", "name": "นาย ชาน ตาร์" },
+            { "id": "ZP92437", "name": "นาย ชาตรี" },
+            { "id": "ZP92440", "name": "นาย สะ ไอ คะ" },
+            { "id": "ZP92470", "name": "นาย โซ แทท อู" },
+            { "id": "ZP92473", "name": "นาย วิชิต สังคทิพย์" },
+            { "id": "ZP92497", "name": "นาย ชาน ลิน ตู" },
+            { "id": "ZP92498", "name": "นาย ทา" },
+            { "id": "ZP92499", "name": "นาย สิทธิศักดิ์ สระทองเนียม" },
+            { "id": "ZP92510", "name": "นาย เกรียงไกร มีสี" },
+            { "id": "ZP92514", "name": "นาย ออง เนย อู" }
+        ];
+
+        // ==========================================
+        // LocalStorage Wrapper
+        // ==========================================
+        const LS = {
+            get: (key) => {
+                try { return localStorage.getItem('PD3_' + key); } 
+                catch(e) { return null; }
+            },
+            set: (key, val) => {
+                try { localStorage.setItem('PD3_' + key, val); return true; } 
+                catch(e) { return false; }
+            },
+            remove: (key) => {
+                try { localStorage.removeItem('PD3_' + key); return true; } 
+                catch(e) { return false; }
+            }
+        };
+
+        // ==========================================
+        // Google Apps Script Configuration
+        // ==========================================
+        const GOOGLE_SCRIPT_URL = '';  // แก้ไขเป็น URL จาก Google Apps Script หลังจาก Deploy
+        // ตัวอย่าง: 'https://script.google.com/macros/s/AKfycbx.../exec'
+
+        // ==========================================
+        // System Health
+        // ==========================================
+        const SYSTEM_HEALTH = {
+            lastSaveTime: null,
+            isOnline: navigator.onLine
+        };
+
+        // ==========================================
+        // Employee Management Functions
+        // ==========================================
+        function addEmployee(shift, pt) {
+            const selectElement = document.getElementById(`employeeSelect_${shift}_${pt}`);
+            const manualInput = document.getElementById(`employeeManual_${shift}_${pt}`);
+            const dataInput = document.getElementById(`employeesData_${shift}_${pt}`);
+            
+            let currentEmployees = [];
+            try {
+                currentEmployees = dataInput.value ? JSON.parse(dataInput.value) : [];
+            } catch(e) {
+                currentEmployees = [];
+            }
+            
+            if (currentEmployees.length >= 5) {
+                showNotification('เพิ่มพนักงานได้สูงสุด 5 คน', 'warning');
+                return;
+            }
+            
+            let employeeName = '';
+            let employeeId = '';
+            
+            if (selectElement.value) {
+                const parts = selectElement.value.split('|');
+                employeeId = parts[0];
+                employeeName = parts[1] || parts[0];
+            } else if (manualInput.value.trim()) {
+                employeeName = manualInput.value.trim();
+                employeeId = employeeName;
+            } else {
+                showNotification('กรุณาเลือกหรือพิมพ์ชื่อพนักงาน', 'warning');
+                return;
+            }
+            
+            if (currentEmployees.some(emp => emp.id === employeeId)) {
+                showNotification('พนักงานคนนี้ถูกเพิ่มแล้ว', 'warning');
+                return;
+            }
+            
+            currentEmployees.push({ id: employeeId, name: employeeName });
+            dataInput.value = JSON.stringify(currentEmployees);
+            renderEmployeeTags(shift, pt);
+            
+            selectElement.value = '';
+            manualInput.value = '';
+        }
+        
+        function removeEmployee(shift, pt, index) {
+            const dataInput = document.getElementById(`employeesData_${shift}_${pt}`);
+            
+            let currentEmployees = [];
+            try {
+                currentEmployees = dataInput.value ? JSON.parse(dataInput.value) : [];
+            } catch(e) {
+                currentEmployees = [];
+            }
+            
+            currentEmployees.splice(index, 1);
+            dataInput.value = JSON.stringify(currentEmployees);
+            renderEmployeeTags(shift, pt);
+        }
+        
+        function renderEmployeeTags(shift, pt) {
+            const tagsContainer = document.getElementById(`employeeTags_${shift}_${pt}`);
+            const dataInput = document.getElementById(`employeesData_${shift}_${pt}`);
+            const countElement = document.getElementById(`employeeCount_${shift}_${pt}`);
+            const addBtn = document.querySelector(`button[onclick="addEmployee('${shift}', '${pt}')"]`);
+            
+            let currentEmployees = [];
+            try {
+                currentEmployees = dataInput.value ? JSON.parse(dataInput.value) : [];
+            } catch(e) {
+                currentEmployees = [];
+            }
+            
+            tagsContainer.innerHTML = '';
+            
+            currentEmployees.forEach((emp, index) => {
+                const tag = document.createElement('div');
+                tag.className = 'employee-tag';
+                tag.innerHTML = `
+                    <span>${emp.name}</span>
+                    <div class="employee-tag-remove" onclick="removeEmployee('${shift}', '${pt}', ${index})">
+                        <svg width="10" height="10" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                        </svg>
+                    </div>
+                `;
+                tagsContainer.appendChild(tag);
+            });
+            
+            if (countElement) {
+                countElement.textContent = `${currentEmployees.length}/5 คน`;
+            }
+            
+            if (addBtn) {
+                addBtn.disabled = currentEmployees.length >= 5;
+            }
+        }
+
+        // ==========================================
+        // Brand Management Functions
+        // ==========================================
+        function addBrand(shift, pt) {
+            const selectElement = document.getElementById(`brandSelect_${shift}_${pt}`);
+            const manualInput = document.getElementById(`brandManual_${shift}_${pt}`);
+            const dataInput = document.getElementById(`brandsData_${shift}_${pt}`);
+            
+            let currentBrands = [];
+            try {
+                currentBrands = dataInput.value ? JSON.parse(dataInput.value) : [];
+            } catch(e) {
+                currentBrands = [];
+            }
+            
+            if (currentBrands.length >= 10) {
+                showNotification('เพิ่มตราได้สูงสุด 10 ตรา', 'warning');
+                return;
+            }
+            
+            let brandName = '';
+            
+            if (selectElement.value) {
+                brandName = selectElement.value;
+            } else if (manualInput.value.trim()) {
+                brandName = manualInput.value.trim();
+            } else {
+                showNotification('กรุณาเลือกหรือพิมพ์ชื่อตรา', 'warning');
+                return;
+            }
+            
+            if (currentBrands.includes(brandName)) {
+                showNotification('ตราชื่อนี้ถูกเพิ่มแล้ว', 'warning');
+                return;
+            }
+            
+            currentBrands.push(brandName);
+            dataInput.value = JSON.stringify(currentBrands);
+            renderBrandTags(shift, pt);
+            renderSOFields(shift, pt); // อัพเดท S/O fields
+            renderTimeFields(shift, pt); // อัพเดท Time fields
+            renderQuantityFields(shift, pt); // อัพเดท Quantity fields
+            
+            selectElement.value = '';
+            manualInput.value = '';
+        }
+        
+        function removeBrand(shift, pt, index) {
+            const dataInput = document.getElementById(`brandsData_${shift}_${pt}`);
+            
+            let currentBrands = [];
+            try {
+                currentBrands = dataInput.value ? JSON.parse(dataInput.value) : [];
+            } catch(e) {
+                currentBrands = [];
+            }
+            
+            // เก็บชื่อตราที่จะลบเพื่อลบ S/O, Time และ Quantity ด้วย
+            const removedBrand = currentBrands[index];
+            
+            currentBrands.splice(index, 1);
+            dataInput.value = JSON.stringify(currentBrands);
+            
+            // ลบ S/O, Time และ Quantity ของตราที่ถูกลบ
+            removeSOForBrand(shift, pt, removedBrand);
+            removeTimeForBrand(shift, pt, removedBrand);
+            removeQuantityForBrand(shift, pt, removedBrand);
+            
+            renderBrandTags(shift, pt);
+            renderSOFields(shift, pt); // อัพเดท S/O fields
+            renderTimeFields(shift, pt); // อัพเดท Time fields
+            renderQuantityFields(shift, pt); // อัพเดท Quantity fields
+        }
+        
+        function renderBrandTags(shift, pt) {
+            const tagsContainer = document.getElementById(`brandTags_${shift}_${pt}`);
+            const dataInput = document.getElementById(`brandsData_${shift}_${pt}`);
+            const countElement = document.getElementById(`brandCount_${shift}_${pt}`);
+            const addBtn = document.querySelector(`button[onclick="addBrand('${shift}', '${pt}')"]`);
+            
+            let currentBrands = [];
+            try {
+                currentBrands = dataInput.value ? JSON.parse(dataInput.value) : [];
+            } catch(e) {
+                currentBrands = [];
+            }
+            
+            tagsContainer.innerHTML = '';
+            
+            currentBrands.forEach((brand, index) => {
+                const tag = document.createElement('div');
+                tag.className = 'brand-tag';
+                tag.innerHTML = `
+                    <span>${brand}</span>
+                    <div class="brand-tag-remove" onclick="removeBrand('${shift}', '${pt}', ${index})">
+                        <svg width="10" height="10" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                        </svg>
+                    </div>
+                `;
+                tagsContainer.appendChild(tag);
+            });
+            
+            if (countElement) {
+                countElement.textContent = `${currentBrands.length}/10 ตรา`;
+            }
+            
+            if (addBtn) {
+                addBtn.disabled = currentBrands.length >= 10;
+            }
+        }
+
+        // ==========================================
+        // Quantity Fields Management
+        // ==========================================
+        function renderQuantityFields(shift, pt) {
+            const container = document.getElementById(`quantityFieldsContainer_${shift}_${pt}`);
+            if (!container) return;
+            
+            const dataInput = document.getElementById(`brandsData_${shift}_${pt}`);
+            let currentBrands = [];
+            try {
+                currentBrands = dataInput.value ? JSON.parse(dataInput.value) : [];
+            } catch(e) {
+                currentBrands = [];
+            }
+            
+            if (currentBrands.length === 0) {
+                container.innerHTML = `
+                    <div class="quantity-empty-state">
+                        กรุณาเพิ่มตราสินค้าก่อน เพื่อกรอกจำนวน
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<div class="quantity-header">จำนวน (ใบ)</div>';
+            html += '<div class="quantity-fields-container">';
+            
+            currentBrands.forEach((brand, index) => {
+                const qtyValue = getQuantityForBrand(shift, pt, brand);
+                html += `
+                    <div class="quantity-field-row">
+                        <div class="quantity-brand-label" title="${brand}">${brand}</div>
+                        <div class="quantity-input-wrapper">
+                            <input type="number" 
+                                   class="quantity-input-small"
+                                   id="qty_${shift}_${pt}_${index}"
+                                   value="${qtyValue}"
+                                   placeholder="0"
+                                   min="0"
+                                   oninput="updateQuantityForBrand('${shift}', '${pt}', '${brand}', this.value)">
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        function getQuantityForBrand(shift, pt, brandName) {
+            const qtyDataInput = document.getElementById(`quantityData_${shift}_${pt}`);
+            if (!qtyDataInput) return '';
+            
+            try {
+                const qtyData = qtyDataInput.value ? JSON.parse(qtyDataInput.value) : {};
+                return qtyData[brandName] || '';
+            } catch(e) {
+                return '';
+            }
+        }
+        
+        function updateQuantityForBrand(shift, pt, brandName, quantity) {
+            const qtyDataInput = document.getElementById(`quantityData_${shift}_${pt}`);
+            if (!qtyDataInput) return;
+            
+            let qtyData = {};
+            try {
+                qtyData = qtyDataInput.value ? JSON.parse(qtyDataInput.value) : {};
+            } catch(e) {
+                qtyData = {};
+            }
+            
+            if (quantity.trim() && parseInt(quantity) >= 0) {
+                qtyData[brandName] = parseInt(quantity);
+            } else {
+                delete qtyData[brandName];
+            }
+            
+            qtyDataInput.value = JSON.stringify(qtyData);
+        }
+        
+        function removeQuantityForBrand(shift, pt, brandName) {
+            const qtyDataInput = document.getElementById(`quantityData_${shift}_${pt}`);
+            if (!qtyDataInput) return;
+            
+            let qtyData = {};
+            try {
+                qtyData = qtyDataInput.value ? JSON.parse(qtyDataInput.value) : {};
+            } catch(e) {
+                qtyData = {};
+            }
+            
+            delete qtyData[brandName];
+            qtyDataInput.value = JSON.stringify(qtyData);
+        }
+
+        // ==========================================
+        // Time Fields Management
+        // ==========================================
+        function renderTimeFields(shift, pt) {
+            const container = document.getElementById(`timeFieldsContainer_${shift}_${pt}`);
+            if (!container) return;
+            
+            const dataInput = document.getElementById(`brandsData_${shift}_${pt}`);
+            let currentBrands = [];
+            try {
+                currentBrands = dataInput.value ? JSON.parse(dataInput.value) : [];
+            } catch(e) {
+                currentBrands = [];
+            }
+            
+            if (currentBrands.length === 0) {
+                container.innerHTML = `
+                    <div class="time-empty-state">
+                        กรุณาเพิ่มตราสินค้าก่อน เพื่อกรอกเวลา
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<div class="time-header">เวลา (เริ่ม-สิ้นสุด)</div>';
+            html += '<div class="time-fields-container">';
+            
+            currentBrands.forEach((brand, index) => {
+                const timeObj = getTimeForBrand(shift, pt, brand);
+                html += `
+                    <div class="time-field-row">
+                        <div class="time-brand-label" title="${brand}">${brand}</div>
+                        <div class="time-inputs-wrapper">
+                            <input type="text" 
+                                   class="time-input-small"
+                                   id="timeStart_${shift}_${pt}_${index}"
+                                   value="${timeObj.start}"
+                                   placeholder="08:30"
+                                   maxlength="5"
+                                   pattern="[0-2][0-9]:[0-5][0-9]"
+                                   oninput="updateTimeForBrand('${shift}', '${pt}', '${brand}', 'start', this.value)">
+                            <span class="time-separator">-</span>
+                            <input type="text" 
+                                   class="time-input-small"
+                                   id="timeEnd_${shift}_${pt}_${index}"
+                                   value="${timeObj.end}"
+                                   placeholder="15:00"
+                                   maxlength="5"
+                                   pattern="[0-2][0-9]:[0-5][0-9]"
+                                   oninput="updateTimeForBrand('${shift}', '${pt}', '${brand}', 'end', this.value)">
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        function getTimeForBrand(shift, pt, brandName) {
+            const timeDataInput = document.getElementById(`timeData_${shift}_${pt}`);
+            if (!timeDataInput) return { start: '', end: '' };
+            
+            try {
+                const timeData = timeDataInput.value ? JSON.parse(timeDataInput.value) : {};
+                return timeData[brandName] || { start: '', end: '' };
+            } catch(e) {
+                return { start: '', end: '' };
+            }
+        }
+        
+        function updateTimeForBrand(shift, pt, brandName, field, value) {
+            const timeDataInput = document.getElementById(`timeData_${shift}_${pt}`);
+            if (!timeDataInput) return;
+            
+            let timeData = {};
+            try {
+                timeData = timeDataInput.value ? JSON.parse(timeDataInput.value) : {};
+            } catch(e) {
+                timeData = {};
+            }
+            
+            if (!timeData[brandName]) {
+                timeData[brandName] = { start: '', end: '' };
+            }
+            
+            timeData[brandName][field] = value.trim();
+            
+            timeDataInput.value = JSON.stringify(timeData);
+        }
+        
+        function removeTimeForBrand(shift, pt, brandName) {
+            const timeDataInput = document.getElementById(`timeData_${shift}_${pt}`);
+            if (!timeDataInput) return;
+            
+            let timeData = {};
+            try {
+                timeData = timeDataInput.value ? JSON.parse(timeDataInput.value) : {};
+            } catch(e) {
+                timeData = {};
+            }
+            
+            delete timeData[brandName];
+            timeDataInput.value = JSON.stringify(timeData);
+        }
+
+        // ==========================================
+        // S/O Fields Management
+        // ==========================================
+        function renderSOFields(shift, pt) {
+            const container = document.getElementById(`soFieldsContainer_${shift}_${pt}`);
+            if (!container) return;
+            
+            const dataInput = document.getElementById(`brandsData_${shift}_${pt}`);
+            let currentBrands = [];
+            try {
+                currentBrands = dataInput.value ? JSON.parse(dataInput.value) : [];
+            } catch(e) {
+                currentBrands = [];
+            }
+            
+            if (currentBrands.length === 0) {
+                container.innerHTML = `
+                    <div class="so-empty-state">
+                        กรุณาเพิ่มตราสินค้าก่อน เพื่อกรอกเลขที่ S/O
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<div class="so-header">';
+            html += 'เลขที่ S/O';
+            html += '</div>';
+            html += '<div class="so-fields-container">';
+            
+            currentBrands.forEach((brand, index) => {
+                const soValue = getSOForBrand(shift, pt, brand);
+                html += `
+                    <div class="so-field-row">
+                        <div class="so-brand-label" title="${brand}">${brand}</div>
+                        <div class="so-input-wrapper">
+                            <input type="text" 
+                                   class="so-input"
+                                   id="so_${shift}_${pt}_${index}"
+                                   value="${soValue}"
+                                   placeholder="กรอกเลขที่ S/O สำหรับ ${brand}"
+                                   oninput="updateSOForBrand('${shift}', '${pt}', '${brand}', this.value)">
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        function getSOForBrand(shift, pt, brandName) {
+            const soDataInput = document.getElementById(`soData_${shift}_${pt}`);
+            if (!soDataInput) return '';
+            
+            try {
+                const soData = soDataInput.value ? JSON.parse(soDataInput.value) : {};
+                return soData[brandName] || '';
+            } catch(e) {
+                return '';
+            }
+        }
+        
+        function updateSOForBrand(shift, pt, brandName, soNumber) {
+            const soDataInput = document.getElementById(`soData_${shift}_${pt}`);
+            if (!soDataInput) return;
+            
+            let soData = {};
+            try {
+                soData = soDataInput.value ? JSON.parse(soDataInput.value) : {};
+            } catch(e) {
+                soData = {};
+            }
+            
+            if (soNumber.trim()) {
+                soData[brandName] = soNumber.trim();
+            } else {
+                delete soData[brandName];
+            }
+            
+            soDataInput.value = JSON.stringify(soData);
+        }
+        
+        function removeSOForBrand(shift, pt, brandName) {
+            const soDataInput = document.getElementById(`soData_${shift}_${pt}`);
+            if (!soDataInput) return;
+            
+            let soData = {};
+            try {
+                soData = soDataInput.value ? JSON.parse(soDataInput.value) : {};
+            } catch(e) {
+                soData = {};
+            }
+            
+            delete soData[brandName];
+            soDataInput.value = JSON.stringify(soData);
+        }
+
+        // ==========================================
+        // Time Input Formatting
+        // ==========================================
+        function formatTimeInput(input) {
+            let value = input.value.replace(/[^0-9]/g, '');
+            
+            if (value.length === 0) {
+                input.value = '';
+                return;
+            }
+            
+            // จำกัดแค่ 4 ตัวเลข
+            if (value.length > 4) {
+                value = value.substring(0, 4);
+            }
+            
+            let hours = '';
+            let minutes = '';
+            
+            if (value.length === 1) {
+                // พิมพ์ 1 ตัว เช่น "8" -> "08:00"
+                hours = '0' + value;
+                minutes = '00';
+            } else if (value.length === 2) {
+                // พิมพ์ 2 ตัว เช่น "08" -> "08:00"
+                hours = value;
+                minutes = '00';
+            } else if (value.length === 3) {
+                // พิมพ์ 3 ตัว เช่น "830" -> "08:30"
+                hours = '0' + value.substring(0, 1);
+                minutes = value.substring(1, 3);
+            } else {
+                // พิมพ์ 4 ตัว เช่น "0830" -> "08:30"
+                hours = value.substring(0, 2);
+                minutes = value.substring(2, 4);
+            }
+            
+            // ตรวจสอบความถูกต้อง
+            const h = parseInt(hours);
+            const m = parseInt(minutes);
+            
+            if (h > 23) {
+                hours = '23';
+            }
+            
+            if (m > 59) {
+                minutes = '59';
+            }
+            
+            input.value = hours + ':' + minutes;
+        }
+        
+        function setupTimeInputs() {
+            document.querySelectorAll('.time-input').forEach(input => {
+                // จำกัดตัวเลขเท่านั้นขณะพิมพ์
+                input.addEventListener('input', function(e) {
+                    let value = this.value.replace(/[^0-9]/g, '');
+                    if (value.length > 4) {
+                        value = value.substring(0, 4);
+                    }
+                    this.value = value;
+                });
+                
+                // Format เมื่อคลิกออกจากฟิลด์
+                input.addEventListener('blur', function(e) {
+                    if (this.value.trim() !== '') {
+                        formatTimeInput(this);
+                    }
+                });
+                
+                // Format เมื่อกด Enter
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && this.value.trim() !== '') {
+                        formatTimeInput(this);
+                    }
+                });
+            });
+        }
+
+        // ==========================================
+        // Initialize System
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                console.log('🚀 ระบบบันทึกยอดผลิต PD3 เริ่มต้นแล้ว');
+                
+                updateCurrentTime();
+                setInterval(updateCurrentTime, 1000);
+                
+                generateDataRows();
+                setupEventListeners();
+                setupTimeInputs();
+                setupNetworkMonitoring();
+                setupAutoSave();
+                loadFromLocalStorage();
+                
+                showNotification('ระบบพร้อมใช้งาน', 'success');
+                
+            } catch (error) {
+                console.error('System initialization error:', error);
+                showNotification('เกิดข้อผิดพลาดในการเริ่มต้นระบบ', 'error');
+            }
+        });
+
+        // ==========================================
+        // Generate Data Rows (2 rows per PT)
+        // ==========================================
+        function generateDataRows() {
+            const today = new Date().toISOString().split('T')[0];
+            
+            const shiftA_tbody = document.getElementById('shiftA_tbody');
+            ptMachines.forEach(pt => {
+                const rows = createDataRow('A', pt, today);
+                shiftA_tbody.appendChild(rows);
+            });
+            
+            const shiftB_tbody = document.getElementById('shiftB_tbody');
+            ptMachines.forEach(pt => {
+                const rows = createDataRow('B', pt, today);
+                shiftB_tbody.appendChild(rows);
+            });
+
+            // Initialize autocomplete after DOM is ready
+            initAutocomplete();
+        }
+
+        // ==========================================
+        // Create Data Row (2 rows per PT machine with labels)
+        // ==========================================
+        function createDataRow(shift, pt, date) {
+            const fragment = document.createDocumentFragment();
+            
+            // Data Row 1: Date, PT, Brand, Time
+            const tr1 = document.createElement('tr');
+            tr1.className = 'row-part1';
+            tr1.innerHTML = `
+                <td>
+                    <label class="field-label">วันที่</label>
+                    <input type="date" 
+                           name="date_${shift}_${pt}" 
+                           value="${date}" 
+                           class="apple-input">
+                </td>
+                <td>
+                    <label class="field-label">เครื่อง PT</label>
+                    <div class="pt-badge">PT ${pt}</div>
+                    <input type="hidden" name="pt_${shift}_${pt}" value="${pt}">
+                </td>
+                <td>
+                    <label class="field-label">ตรา</label>
+                    <div class="brand-container">
+                        <div class="brand-tags" id="brandTags_${shift}_${pt}"></div>
+                        <div class="brand-input-group">
+                            <select id="brandSelect_${shift}_${pt}" class="apple-select brand-select-small">
+                                <option value="">เลือกตรา</option>
+                                ${brands.map(brand => `<option value="${brand}">${brand}</option>`).join('')}
+                            </select>
+                            <span style="color: var(--apple-text-secondary); font-size: 14px;">หรือ</span>
+                            <div class="autocomplete-container" style="flex: 2; min-width: 280px;">
+                                <input type="text" 
+                                       id="brandManual_${shift}_${pt}" 
+                                       class="apple-input brand-input-small brand-autocomplete" 
+                                       placeholder="พิมพ์ชื่อตรา..."
+                                       autocomplete="off">
+                                <div class="autocomplete-suggestions" id="brandSuggestions_${shift}_${pt}"></div>
+                            </div>
+                            <button type="button" 
+                                    class="brand-add-btn" 
+                                    onclick="addBrand('${shift}', '${pt}')">
+                                <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                                </svg>
+                                เพิ่ม
+                            </button>
+                        </div>
+                        <div class="brand-count" id="brandCount_${shift}_${pt}">0/10 ตรา</div>
+                    </div>
+                    <input type="hidden" name="brands_${shift}_${pt}" id="brandsData_${shift}_${pt}" value="">
+                </td>
+                <td>
+                    <button type="button" 
+                            class="reset-machine-btn" 
+                            onclick="resetMachineData('${shift}', '${pt}')"
+                            title="รีเซ็ตข้อมูลเครื่อง PT ${pt}"
+                            style="margin-top: 24px;">
+                        <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                        </svg>
+                    </button>
+                </td>
+            `;
+            
+            // Row 2: Employees, Notes
+            const tr2 = document.createElement('tr');
+            tr2.className = 'row-part2';
+            tr2.innerHTML = `
+                <td colspan="3">
+                    <label class="field-label">ชื่อพนักงาน</label>
+                    <div class="employee-container">
+                        <div class="employee-tags" id="employeeTags_${shift}_${pt}"></div>
+                        <div class="employee-input-group">
+                            <select id="employeeSelect_${shift}_${pt}" class="apple-select employee-select-small">
+                                <option value="">เลือกพนักงาน</option>
+                                ${employees.map(emp => `<option value="${emp.id}|${emp.name}">${emp.id} - ${emp.name}</option>`).join('')}
+                            </select>
+                            <span style="color: var(--apple-text-secondary); font-size: 14px;">หรือ</span>
+                            <div class="autocomplete-container" style="flex: 1; min-width: 150px;">
+                                <input type="text" 
+                                       id="employeeManual_${shift}_${pt}" 
+                                       class="apple-input employee-input-small employee-autocomplete" 
+                                       placeholder="พิมพ์ชื่อ..."
+                                       autocomplete="off">
+                                <div class="autocomplete-suggestions" id="employeeSuggestions_${shift}_${pt}"></div>
+                            </div>
+                            <button type="button" 
+                                    class="employee-add-btn" 
+                                    onclick="addEmployee('${shift}', '${pt}')">
+                                <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                                </svg>
+                                เพิ่ม
+                            </button>
+                        </div>
+                        <div class="employee-count" id="employeeCount_${shift}_${pt}">0/5 คน</div>
+                    </div>
+                    <input type="hidden" name="employees_${shift}_${pt}" id="employeesData_${shift}_${pt}" value="">
+                </td>
+                <td>
+                    <label class="field-label">หมายเหตุ/ปัญหาที่พบ</label>
+                    <textarea name="notes_${shift}_${pt}" 
+                              class="apple-textarea" 
+                              placeholder="บันทึกหมายเหตุ..."></textarea>
+                </td>
+            `;
+            
+            // Row 3: S/O Number and Time fields (Dynamic based on brands)
+            const tr3 = document.createElement('tr');
+            tr3.className = 'row-part3';
+            tr3.innerHTML = `
+                <td colspan="4">
+                    <!-- Hidden field สำหรับเก็บ brands data -->
+                    <input type="hidden" id="brandsData_${shift}_${pt}" name="brands_data_${shift}_${pt}" value="">
+                    
+                    <div id="soFieldsContainer_${shift}_${pt}">
+                        <div class="so-empty-state">
+                            กรุณาเพิ่มตราสินค้าก่อน เพื่อกรอกเลขที่ S/O
+                        </div>
+                    </div>
+                    <input type="hidden" id="soData_${shift}_${pt}" name="so_data_${shift}_${pt}" value="">
+                    
+                    <div id="timeFieldsContainer_${shift}_${pt}" style="margin-top: 16px;">
+                        <div class="time-empty-state">
+                            กรุณาเพิ่มตราสินค้าก่อน เพื่อกรอกเวลา
+                        </div>
+                    </div>
+                    <input type="hidden" id="timeData_${shift}_${pt}" name="time_data_${shift}_${pt}" value="">
+                    
+                    <div id="quantityFieldsContainer_${shift}_${pt}" style="margin-top: 16px;">
+                        <div class="quantity-empty-state">
+                            กรุณาเพิ่มตราสินค้าก่อน เพื่อกรอกจำนวน
+                        </div>
+                    </div>
+                    <input type="hidden" id="quantityData_${shift}_${pt}" name="quantity_data_${shift}_${pt}" value="">
+                </td>
+            `;
+            
+            fragment.appendChild(tr1);
+            fragment.appendChild(tr2);
+            fragment.appendChild(tr3);
+            return fragment;
+        }
+
+        // ==========================================
+        // Update Current Time
+        // ==========================================
+        function updateCurrentTime() {
+            try {
+                const now = new Date();
+                const timeString = now.toLocaleString('th-TH', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                const timeElement = document.getElementById('currentTime');
+                if (timeElement) {
+                    timeElement.textContent = timeString;
+                }
+            } catch (error) {
+                console.error('Update time failed:', error);
+            }
+        }
+
+        // ==========================================
+        // Setup Event Listeners
+        // ==========================================
+        function setupEventListeners() {
+            // Event listeners setup (localStorage removed)
+        }
+
+        // ==========================================
+        // Setup Network Monitoring
+        // ==========================================
+        function setupNetworkMonitoring() {
+            window.addEventListener('online', function() {
+                SYSTEM_HEALTH.isOnline = true;
+                showNotification('เชื่อมต่ออินเทอร์เน็ตแล้ว', 'success');
+            });
+            
+            window.addEventListener('offline', function() {
+                SYSTEM_HEALTH.isOnline = false;
+                showNotification('ไม่มีการเชื่อมต่ออินเทอร์เน็ต', 'warning');
+            });
+        }
+
+        // ==========================================
+        // Setup Auto Save
+        // ==========================================
+        function setupAutoSave() {
+            // Auto-save functionality removed (localStorage no longer used)
+        }
+
+        // ==========================================
+        // Collect Form Data (อัพเดทให้รวม timeData และ quantityData)
+        // ==========================================
+        function collectFormData() {
+            const data = {
+                date: document.querySelector('[name="date_A_1"]')?.value || new Date().toLocaleDateString('th-TH'),
+                shiftA: {},
+                shiftB: {}
+            };
+            
+            // รวบรวมข้อมูลกะ A
+            ptMachines.forEach(pt => {
+                const brandsInput = document.getElementById(`brandsData_A_${pt}`);
+                const soInput = document.getElementById(`soData_A_${pt}`);
+                const timeInput = document.getElementById(`timeData_A_${pt}`);
+                const qtyInput = document.getElementById(`quantityData_A_${pt}`);
+                const empInput = document.getElementById(`employeesData_A_${pt}`);
+                const notesField = document.querySelector(`[name="notes_A_${pt}"]`);
+                
+                data.shiftA[`PT${pt}`] = {
+                    brands: brandsInput?.value ? JSON.parse(brandsInput.value) : [],
+                    soData: soInput?.value ? JSON.parse(soInput.value) : {},
+                    timeData: timeInput?.value ? JSON.parse(timeInput.value) : {},
+                    quantityData: qtyInput?.value ? JSON.parse(qtyInput.value) : {},
+                    employees: empInput?.value ? JSON.parse(empInput.value) : [],
+                    notes: notesField?.value || ''
+                };
+            });
+            
+            // รวบรวมข้อมูลกะ B
+            ptMachines.forEach(pt => {
+                const brandsInput = document.getElementById(`brandsData_B_${pt}`);
+                const soInput = document.getElementById(`soData_B_${pt}`);
+                const timeInput = document.getElementById(`timeData_B_${pt}`);
+                const qtyInput = document.getElementById(`quantityData_B_${pt}`);
+                const empInput = document.getElementById(`employeesData_B_${pt}`);
+                const notesField = document.querySelector(`[name="notes_B_${pt}"]`);
+                
+                data.shiftB[`PT${pt}`] = {
+                    brands: brandsInput?.value ? JSON.parse(brandsInput.value) : [],
+                    soData: soInput?.value ? JSON.parse(soInput.value) : {},
+                    timeData: timeInput?.value ? JSON.parse(timeInput.value) : {},
+                    quantityData: qtyInput?.value ? JSON.parse(qtyInput.value) : {},
+                    employees: empInput?.value ? JSON.parse(empInput.value) : [],
+                    notes: notesField?.value || ''
+                };
+            });
+            
+            return data;
+        }
+
+        // ==========================================
+        // Submit Data
+        // ==========================================
+        async function submitData() {
+            // ตรวจสอบ Internet connection ก่อน
+            if (!navigator.onLine) {
+                showNotification('⚠️ ไม่มีการเชื่อมต่ออินเทอร์เน็ต กรุณาตรวจสอบการเชื่อมต่อ', 'error');
+                return;
+            }
+            
+            const data = collectFormData();
+            
+            // ตรวจสอบว่ามีข้อมูลหรือไม่
+            let hasData = false;
+            let dataCount = 0;
+            
+            ['shiftA', 'shiftB'].forEach(shift => {
+                if (data[shift]) {
+                    ptMachines.forEach(pt => {
+                        const ptKey = `PT${pt}`;
+                        const ptData = data[shift][ptKey];
+                        if (ptData && ptData.brands && ptData.brands.length > 0) {
+                            hasData = true;
+                            dataCount += ptData.brands.length;
+                        }
+                    });
+                }
+            });
+            
+            if (!hasData) {
+                showNotification('❌ กรุณากรอกข้อมูลอย่างน้อย 1 ตรา', 'warning');
+                return;
+            }
+            
+            // แสดง Confirmation
+            showConfirmModal(
+                'ยืนยันการบันทึกข้อมูล',
+                `พบข้อมูลทั้งหมด ${dataCount} รายการ\n\nต้องการบันทึกลง Google Sheets ใช่หรือไม่?`,
+                async function() {
+                    // เรียกใช้ function sendToGoogleSheets() ที่มีอยู่แล้ว
+                    const success = await sendToGoogleSheets();
+                    
+                    if (success) {
+                        console.log('✅ Data saved successfully');
+                    } else {
+                        console.error('❌ Failed to save data');
+                    }
+                }
+            );
+        }
+
+        // ==========================================
+        // Reset Machine Data
+        // ==========================================
+        function resetMachineData(shift, pt) {
+            showConfirmModal(
+                `รีเซ็ตข้อมูล PT ${pt} กะ ${shift}`,
+                'ต้องการรีเซ็ตข้อมูลของเครื่องนี้หรือไม่?\n\nข้อมูลจะถูกลบทั้งหมด!',
+                function() {
+                    performResetMachineData(shift, pt);
+                }
+            );
+        }
+
+        function performResetMachineData(shift, pt) {
+            
+            // Reset วันที่เป็นวันปัจจุบัน
+            const dateField = document.querySelector(`[name="date_${shift}_${pt}"]`);
+            if (dateField) {
+                dateField.value = new Date().toISOString().split('T')[0];
+            }
+            
+            // Clear ตรา (dropdown)
+            const brandField = document.querySelector(`[name="brand_${shift}_${pt}"]`);
+            if (brandField) {
+                brandField.value = '';
+            }
+            
+            // Clear ตรา (manual input)
+            const brandManualField = document.querySelector(`[name="brandManual_${shift}_${pt}"]`);
+            if (brandManualField) {
+                brandManualField.value = '';
+            }
+            
+            // Clear เวลาเริ่ม
+            const timeStartField = document.querySelector(`[name="timeStart_${shift}_${pt}"]`);
+            if (timeStartField) {
+                timeStartField.value = '';
+            }
+            
+            // Clear เวลาสิ้นสุด
+            const timeEndField = document.querySelector(`[name="timeEnd_${shift}_${pt}"]`);
+            if (timeEndField) {
+                timeEndField.value = '';
+            }
+            
+            // Clear จำนวน
+            const quantityField = document.querySelector(`[name="quantity_${shift}_${pt}"]`);
+            if (quantityField) {
+                quantityField.value = '';
+            }
+            
+            // Clear พนักงาน
+            const employeesDataField = document.getElementById(`employeesData_${shift}_${pt}`);
+            if (employeesDataField) {
+                employeesDataField.value = '';
+                renderEmployeeTags(shift, pt);
+            }
+            
+            // Clear employee select
+            const employeeSelect = document.getElementById(`employeeSelect_${shift}_${pt}`);
+            if (employeeSelect) {
+                employeeSelect.value = '';
+            }
+            
+            // Clear employee manual input
+            const employeeManual = document.getElementById(`employeeManual_${shift}_${pt}`);
+            if (employeeManual) {
+                employeeManual.value = '';
+            }
+            
+            // Clear หมายเหตุ
+            const notesField = document.querySelector(`[name="notes_${shift}_${pt}"]`);
+            if (notesField) {
+                notesField.value = '';
+            }
+            
+            // Clear เลขที่ S/O
+            const soDataField = document.getElementById(`soData_${shift}_${pt}`);
+            if (soDataField) {
+                soDataField.value = '';
+            }
+            
+            // Clear ตรา (brands array)
+            const brandsDataField = document.getElementById(`brandsData_${shift}_${pt}`);
+            if (brandsDataField) {
+                brandsDataField.value = '';
+                renderBrandTags(shift, pt);
+                renderSOFields(shift, pt); // รีเซ็ต S/O fields ด้วย
+            }
+            
+            // Clear brand select
+            const brandSelect = document.getElementById(`brandSelect_${shift}_${pt}`);
+            if (brandSelect) {
+                brandSelect.value = '';
+            }
+            
+            // Clear brand manual input
+            const brandManual = document.getElementById(`brandManual_${shift}_${pt}`);
+            if (brandManual) {
+                brandManual.value = '';
+            }
+            
+            showNotification(`รีเซ็ตข้อมูล PT ${pt} กะ ${shift} สำเร็จ`, 'success');
+        }
+
+        // ==========================================
+        // Show Loading
+        // ==========================================
+        function showLoading(show, message = 'กำลังเตรียมข้อมูล...') {
+            console.log('🔄 showLoading called:', { show, message });
+            
+            const overlay = document.getElementById('loadingOverlay');
+            const statusElement = document.getElementById('loadingStatus');
+            const progressBar = overlay?.querySelector('.progress-bar');
+            
+            console.log('📍 Elements found:', { 
+                overlay: !!overlay, 
+                statusElement: !!statusElement, 
+                progressBar: !!progressBar 
+            });
+            
+            if (overlay) {
+                overlay.classList.toggle('hidden', !show);
+                console.log('👁️ Overlay visibility:', !show ? 'hidden' : 'visible');
+                
+                if (show && statusElement) {
+                    statusElement.textContent = message;
+                    
+                    // Reset progress bar
+                    if (progressBar) {
+                        progressBar.style.width = '0%';
+                    }
+                    
+                    // Simulate progress messages with progress bar
+                    const messages = [
+                        { text: 'กำลังตรวจสอบข้อมูล...', progress: 25 },
+                        { text: 'กำลังส่งข้อมูลไปยังระบบ...', progress: 50 },
+                        { text: 'กำลังสร้างรายงาน...', progress: 75 },
+                        { text: 'เกือบเสร็จแล้ว...', progress: 90 }
+                    ];
+                    
+                    let currentIndex = 0;
+                    
+                    // Initial progress
+                    setTimeout(() => {
+                        if (progressBar && !overlay.classList.contains('hidden')) {
+                            progressBar.style.width = '10%';
+                        }
+                    }, 100);
+                    
+                    const interval = setInterval(() => {
+                        if (!overlay.classList.contains('hidden') && currentIndex < messages.length) {
+                            const current = messages[currentIndex];
+                            statusElement.textContent = current.text;
+                            if (progressBar) {
+                                progressBar.style.width = current.progress + '%';
+                            }
+                            currentIndex++;
+                        } else {
+                            clearInterval(interval);
+                        }
+                    }, 1500);
+                    
+                    // Store interval ID to clear it when hiding
+                    overlay.dataset.intervalId = interval;
+                } else if (!show) {
+                    // Complete progress bar before hiding
+                    if (progressBar) {
+                        progressBar.style.width = '100%';
+                    }
+                    
+                    if (overlay.dataset.intervalId) {
+                        clearInterval(parseInt(overlay.dataset.intervalId));
+                    }
+                }
+            }
+        }
+
+        // ==========================================
+        // Show Success Modal
+        // ==========================================
+        function showSuccessModal() {
+            console.log('🎉 showSuccessModal called');
+            const modal = document.getElementById('successModal');
+            console.log('📍 Success modal element:', !!modal);
+            if (modal) {
+                modal.classList.remove('hidden');
+                console.log('✅ Success modal shown');
+            }
+        }
+
+        // ==========================================
+        // Close Success Modal
+        // ==========================================
+        function closeSuccessModal() {
+            console.log('❌ closeSuccessModal called');
+            const modal = document.getElementById('successModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                console.log('✅ Success modal hidden');
+            }
+        }
+
+        // ==========================================
+        // Save Form Data to LocalStorage
+        // ==========================================
+        function saveFormData(data) {
+            try {
+                localStorage.setItem('pd3_production_data', JSON.stringify(data));
+                console.log('💾 Form data saved to localStorage');
+            } catch (error) {
+                console.error('❌ Failed to save form data:', error);
+            }
+        }
+
+        // ==========================================
+        // Load Form Data from LocalStorage
+        // ==========================================
+        function loadFormData() {
+            try {
+                const savedData = localStorage.getItem('pd3_production_data');
+                if (!savedData) {
+                    console.log('📭 No saved data found');
+                    return null;
+                }
+                
+                const data = JSON.parse(savedData);
+                console.log('📥 Form data loaded from localStorage');
+                return data;
+            } catch (error) {
+                console.error('❌ Failed to load form data:', error);
+                return null;
+            }
+        }
+
+        // ==========================================
+        // Load Form Data from LocalStorage on Page Load
+        // ==========================================
+        function loadFromLocalStorage() {
+            const savedData = loadFormData();
+            if (savedData) {
+                console.log('📥 Restoring saved form data...');
+                // สามารถเพิ่มโค้ดเพื่อกู้คืนข้อมูลลงฟอร์มได้ที่นี่
+                // แต่ในระบบนี้เราจะให้ข้อมูลอยู่ใน localStorage เฉยๆ
+                // เพราะข้อมูลจะถูกบันทึกหลังจากส่งสำเร็จแล้ว
+            }
+        }
+
+        // ==========================================
+        // Show Confirm Modal
+        // ==========================================
+        let confirmCallback = null;
+
+        function showConfirmModal(title, message, onConfirm) {
+            const modal = document.getElementById('confirmModal');
+            const titleEl = document.getElementById('confirmTitle');
+            const messageEl = document.getElementById('confirmMessage');
+            
+            if (modal && titleEl && messageEl) {
+                titleEl.textContent = title;
+                messageEl.textContent = message;
+                confirmCallback = onConfirm;
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function closeConfirmModal(confirmed) {
+            const modal = document.getElementById('confirmModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                
+                if (confirmed && confirmCallback) {
+                    confirmCallback();
+                }
+                
+                confirmCallback = null;
+            }
+        }
+
+        // ==========================================
+        // Reset System (Clear All Data)
+        // ==========================================
+        function resetSystem() {
+            showConfirmModal(
+                'รีเซ็ตระบบทั้งหมด',
+                'ต้องการรีเซ็ตระบบและลบข้อมูลทั้งหมดใช่หรือไม่?\n\nการกระทำนี้ไม่สามารถย้อนกลับได้',
+                function() {
+                    // ล้างข้อมูลใน localStorage
+                    localStorage.removeItem('pd3_production_data');
+                    console.log('🗑️ localStorage cleared');
+                    
+                    // รีโหลดหน้าเว็บเพื่อรีเซ็ตฟอร์ม
+                    location.reload();
+                }
+            );
+        }
+
+        // ==========================================
+        // Send Data to Google Sheets
+        // ==========================================
+        async function sendToGoogleSheets() {
+            // ตรวจสอบว่า URL ถูกตั้งค่าแล้วหรือยัง
+            if (!GOOGLE_APPS_SCRIPT_URL || GOOGLE_APPS_SCRIPT_URL === '') {
+                showNotification('⚠️ กรุณาตั้งค่า Google Apps Script URL ก่อน', 'error');
+                console.error('❌ GOOGLE_APPS_SCRIPT_URL is not configured');
+                alert('⚠️ ระบบยังไม่ได้ตั้งค่า Google Apps Script URL\n\nกรุณาติดต่อผู้ดูแลระบบ');
+                return false;
+            }
+            
+            // ตรวจสอบ Internet connection
+            if (!navigator.onLine) {
+                showNotification('⚠️ ไม่มีการเชื่อมต่ออินเทอร์เน็ต', 'error');
+                return false;
+            }
+            
+            try {
+                // รวบรวมข้อมูล
+                const data = collectFormData();
+                
+                // Validate data
+                if (!data.date || !data.shiftA || !data.shiftB) {
+                    showNotification('⚠️ ข้อมูลไม่สมบูรณ์ กรุณาตรวจสอบ', 'warning');
+                    return false;
+                }
+                
+                // แสดง loading overlay
+                showLoading(true, 'กำลังเตรียมข้อมูล...');
+                
+                console.log('📤 Sending data to Google Sheets:', GOOGLE_APPS_SCRIPT_URL);
+                console.log('📦 Data structure:', data);
+                console.log('📊 Data JSON:', JSON.stringify(data));
+                
+                // ส่งข้อมูลไป Apps Script แบบ URLSearchParams
+                const formData = new URLSearchParams();
+                formData.append('data', JSON.stringify(data));
+                
+                console.log('📤 Sending POST request...');
+                
+                const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData,
+                    redirect: 'follow'
+                });
+                
+                console.log('✅ Response received');
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
+                // อ่าน response body
+                const responseText = await response.text();
+                console.log('📄 Response text:', responseText);
+                
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                    console.log('📦 Parsed result:', result);
+                } catch (parseError) {
+                    console.error('❌ Failed to parse response as JSON:', parseError);
+                    console.log('Raw response:', responseText);
+                    showLoading(false);
+                    throw new Error('ไม่สามารถอ่าน response จาก Apps Script ได้');
+                }
+                
+                if (result.success) {
+                    // ปิด loading
+                    showLoading(false);
+                    
+                    // บันทึกข้อมูลลง localStorage
+                    saveFormData(data);
+                    
+                    // แสดง success modal แทน notification
+                    showSuccessModal();
+                    
+                    console.log('📁 Sheet URL:', result.sheetUrl);
+                    console.log('📁 Sheet ID:', result.sheetId);
+                    
+                    // เปิด Google Sheet อัตโนมัติ
+                    if (result.sheetUrl) {
+                        setTimeout(() => {
+                            window.open(result.sheetUrl, '_blank');
+                        }, 1000);
+                    }
+                    
+                    return true;
+                } else {
+                    showLoading(false);
+                    throw new Error(result.message || 'การบันทึกล้มเหลว');
+                }
+                
+            } catch (error) {
+                showLoading(false);
+                console.error('❌ Error sending data to Google Sheets:', error);
+                console.error('Error stack:', error.stack);
+                
+                // แสดง Error message ที่เข้าใจง่าย
+                let errorMsg = 'เกิดข้อผิดพลาดในการบันทึกข้อมูล';
+                
+                if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+                    errorMsg = '⚠️ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้\nกรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต';
+                } else if (error.message.includes('timeout')) {
+                    errorMsg = '⏰ การบันทึกใช้เวลานานเกินไป\nกรุณาลองใหม่อีกครั้ง';
+                } else {
+                    errorMsg = '❌ เกิดข้อผิดพลาด: ' + error.message;
+                }
+                
+                showNotification(errorMsg, 'error');
+                alert(errorMsg + '\n\nโปรดติดต่อผู้ดูแลระบบหากปัญหายังคงมีอยู่');
+                return false;
+            }
+        }
+        
+        /**
+         * ฟังก์ชันทดสอบการส่งข้อมูล (สำหรับ Debug)
+         */
+        async function testGoogleSheetsConnection() {
+            if (!GOOGLE_APPS_SCRIPT_URL || GOOGLE_APPS_SCRIPT_URL === '') {
+                console.error('❌ GOOGLE_APPS_SCRIPT_URL is not configured');
+                alert('กรุณาตั้งค่า GOOGLE_APPS_SCRIPT_URL ก่อน\n\nดูวิธีการตั้งค่าใน GOOGLE_SHEETS_SETUP.md');
+                return;
+            }
+            
+            console.log('\n=== 🧪 TESTING CONNECTION ===');
+            console.log('Target URL:', GOOGLE_APPS_SCRIPT_URL);
+            
+            try {
+                const data = collectFormData();
+                console.log('\n📦 Collected Data:');
+                console.log('- Date:', data.date);
+                console.log('- Shift A PTs:', Object.keys(data.shiftA));
+                console.log('- Shift B PTs:', Object.keys(data.shiftB));
+                console.log('\n📊 Full Data JSON:');
+                console.log(JSON.stringify(data, null, 2));
+                
+                const formData = new URLSearchParams();
+                formData.append('data', JSON.stringify(data));
+                
+                console.log('\n📤 Sending POST request...');
+                
+                const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData,
+                    redirect: 'follow'
+                });
+                
+                console.log('\n✅ Response Received:');
+                console.log('- Status:', response.status);
+                console.log('- Status Text:', response.statusText);
+                console.log('- OK:', response.ok);
+                console.log('- Headers:', [...response.headers.entries()]);
+                
+                const text = await response.text();
+                console.log('\n📄 Response Text:');
+                console.log(text);
+                
+                try {
+                    const result = JSON.parse(text);
+                    console.log('\n📦 Parsed Result:');
+                    console.log(result);
+                    
+                    if (result.success) {
+                        console.log('\n✅ SUCCESS!');
+                        console.log('Sheet URL:', result.sheetUrl);
+                        console.log('Sheet ID:', result.sheetId);
+                        alert(`✅ ทดสอบสำเร็จ!\n\nSheet URL: ${result.sheetUrl}\n\nตรวจสอบ Google Drive ว่ามีไฟล์ถูกสร้างแล้ว\n\nคลิก OK เพื่อเปิด Sheet`);
+                        window.open(result.sheetUrl, '_blank');
+                    } else {
+                        console.error('\n❌ FAILED:', result.message);
+                        alert('❌ ทดสอบล้มเหลว\n\n' + result.message + '\n\nดูรายละเอียดใน Console (F12)');
+                    }
+                } catch (parseError) {
+                    console.error('\n❌ JSON Parse Error:', parseError);
+                    console.log('Response is not valid JSON');
+                    alert('⚠️ ได้รับ response แต่ไม่ใช่ JSON\n\nResponse: ' + text.substring(0, 200));
+                }
+            } catch (error) {
+                console.error('\n❌ CONNECTION ERROR:');
+                console.error('Error:', error);
+                console.error('Stack:', error.stack);
+                alert('❌ การทดสอบล้มเหลว\n\n' + error.message + '\n\nดูรายละเอียดใน Console (F12)');
+            }
+            
+            console.log('\n=== TEST COMPLETE ===\n');
+        }
+
+        // ==========================================
+        // Show Notification
+        // ==========================================
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('notifications');
+            if (!container) return;
+            
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-orange-500',
+                info: 'bg-blue-500'
+            };
+            
+            const icons = {
+                success: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>',
+                error: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>',
+                warning: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>',
+                info: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>'
+            };
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${colors[type]} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 min-w-[280px]`;
+            notification.innerHTML = `
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    ${icons[type]}
+                </svg>
+                <span class="flex-1">${message}</span>
+                <button onclick="this.parentElement.remove()" class="text-white/80 hover:text-white">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            `;
+            
+            container.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                notification.style.transition = 'all 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+
+        // ==========================================
+        // Autocomplete Functions
+        // ==========================================
+        function initAutocomplete() {
+            // Setup Brand Autocomplete
+            document.querySelectorAll('.brand-autocomplete').forEach(input => {
+                const suggestionsDiv = input.nextElementSibling;
+                let selectedIndex = -1;
+
+                input.addEventListener('input', function() {
+                    const value = this.value.toLowerCase().trim();
+                    
+                    if (value.length === 0) {
+                        suggestionsDiv.classList.remove('show');
+                        return;
+                    }
+
+                    const matches = brands.filter(brand => 
+                        brand.toLowerCase().includes(value)
+                    ).slice(0, 10);
+
+                    if (matches.length === 0) {
+                        suggestionsDiv.innerHTML = '<div class="autocomplete-no-results">ไม่พบรายการที่ตรงกัน</div>';
+                        suggestionsDiv.classList.add('show');
+                        return;
+                    }
+
+                    suggestionsDiv.innerHTML = matches.map(brand => {
+                        const regex = new RegExp(`(${escapeRegex(value)})`, 'gi');
+                        const highlighted = brand.replace(regex, '<mark>$1</mark>');
+                        return `<div class="autocomplete-item" data-value="${escapeHtml(brand)}">${highlighted}</div>`;
+                    }).join('');
+                    
+                    suggestionsDiv.classList.add('show');
+                    selectedIndex = -1;
+                });
+
+                input.addEventListener('keydown', function(e) {
+                    const items = suggestionsDiv.querySelectorAll('.autocomplete-item');
+                    
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                        updateSelection(items, selectedIndex);
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        selectedIndex = Math.max(selectedIndex - 1, -1);
+                        updateSelection(items, selectedIndex);
+                    } else if (e.key === 'Enter' && selectedIndex >= 0) {
+                        e.preventDefault();
+                        items[selectedIndex].click();
+                    } else if (e.key === 'Escape') {
+                        suggestionsDiv.classList.remove('show');
+                        selectedIndex = -1;
+                    }
+                });
+
+                input.addEventListener('blur', function() {
+                    setTimeout(() => {
+                        suggestionsDiv.classList.remove('show');
+                        selectedIndex = -1;
+                    }, 200);
+                });
+
+                suggestionsDiv.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('autocomplete-item')) {
+                        input.value = e.target.dataset.value;
+                        suggestionsDiv.classList.remove('show');
+                        selectedIndex = -1;
+                    }
+                });
+            });
+
+            // Setup Employee Autocomplete
+            document.querySelectorAll('.employee-autocomplete').forEach(input => {
+                const suggestionsDiv = input.nextElementSibling;
+                let selectedIndex = -1;
+
+                input.addEventListener('input', function() {
+                    const value = this.value.toLowerCase().trim();
+                    
+                    if (value.length === 0) {
+                        suggestionsDiv.classList.remove('show');
+                        return;
+                    }
+
+                    const matches = employees.filter(emp => 
+                        emp.name.toLowerCase().includes(value) || 
+                        emp.id.toLowerCase().includes(value)
+                    ).slice(0, 8);
+
+                    if (matches.length === 0) {
+                        suggestionsDiv.innerHTML = '<div class="autocomplete-no-results">ไม่พบพนักงานที่ตรงกัน</div>';
+                        suggestionsDiv.classList.add('show');
+                        return;
+                    }
+
+                    suggestionsDiv.innerHTML = matches.map(emp => {
+                        const displayText = `${emp.id} - ${emp.name}`;
+                        const regex = new RegExp(`(${escapeRegex(value)})`, 'gi');
+                        const highlighted = displayText.replace(regex, '<mark>$1</mark>');
+                        return `<div class="autocomplete-item" data-id="${escapeHtml(emp.id)}" data-name="${escapeHtml(emp.name)}">${highlighted}</div>`;
+                    }).join('');
+                    
+                    suggestionsDiv.classList.add('show');
+                    selectedIndex = -1;
+                });
+
+                input.addEventListener('keydown', function(e) {
+                    const items = suggestionsDiv.querySelectorAll('.autocomplete-item');
+                    
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                        updateSelection(items, selectedIndex);
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        selectedIndex = Math.max(selectedIndex - 1, -1);
+                        updateSelection(items, selectedIndex);
+                    } else if (e.key === 'Enter' && selectedIndex >= 0) {
+                        e.preventDefault();
+                        items[selectedIndex].click();
+                    } else if (e.key === 'Escape') {
+                        suggestionsDiv.classList.remove('show');
+                        selectedIndex = -1;
+                    }
+                });
+
+                input.addEventListener('blur', function() {
+                    setTimeout(() => {
+                        suggestionsDiv.classList.remove('show');
+                        selectedIndex = -1;
+                    }, 200);
+                });
+
+                suggestionsDiv.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('autocomplete-item')) {
+                        input.value = e.target.dataset.name;
+                        suggestionsDiv.classList.remove('show');
+                        selectedIndex = -1;
+                    }
+                });
+            });
+        }
+
+        function updateSelection(items, index) {
+            items.forEach((item, i) => {
+                item.classList.toggle('active', i === index);
+            });
+            
+            if (index >= 0 && items[index]) {
+                items[index].scrollIntoView({ block: 'nearest' });
+            }
+        }
+
+        function escapeRegex(str) {
+            return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
+
