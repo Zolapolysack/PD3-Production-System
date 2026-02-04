@@ -2,30 +2,29 @@
 
 ระบบบันทึกและติดตามยอดผลิตแผนก PD3 พร้อม Dashboard สำหรับวิเคราะห์ S/O
 
----
 
-## 📁 โครงสร้างโปรเจค
+ 📁 โครงสร้างโปรเจค
 
 ```
 PD3/
 ├── 📂 production/              # ไฟล์สำหรับ Deploy (ใช้งานจริง)
-│   ├── pd3_production_v3.html  # 📝 ฟอร์มบันทึกยอดผลิต
-│   ├── dashboard.html          # 📊 Dashboard ติดตาม S/O
-│   ├── Code.gs                 # ⚙️ Backend Google Apps Script
+│   ├── pd3_production_v3.html  #  ฟอร์มบันทึกยอดผลิต
+│   ├── dashboard.html          #  Dashboard ติดตาม S/O
+│   ├── Code.gs                 #  Backend Google Apps Script
 │   └── data/
-│       └── brands_array.js     # 🏷️ ข้อมูลตราสินค้า
+│       └── brands_array.js     #  ข้อมูลตราสินค้า
 │
 ├── 📂 docs/                    # เอกสารทั้งหมด
-│   ├── SETUP_GUIDE.md          # 📖 คู่มือติดตั้ง
-│   ├── DEEP_VERIFICATION_REPORT.md      # ✅ รายงานตรวจสอบอย่างละเอียด
-│   ├── CRITICAL_ISSUE_FIXED.md          # 🔧 รายงานการแก้ไข Bug
-│   ├── FINAL_SYSTEM_AUDIT_REPORT.md     # 📋 รายงานตรวจสอบระบบ
-│   ├── SYSTEM_VERIFICATION.md           # ✓ การตรวจสอบระบบ
-│   └── PROMT.md                         # 📝 Prompt อธิบายระบบ
+│   ├── SETUP_GUIDE.md          #  คู่มือติดตั้ง
+│   ├── DEEP_VERIFICATION_REPORT.md      #  รายงานตรวจสอบอย่างละเอียด
+│   ├── CRITICAL_ISSUE_FIXED.md          #  รายงานการแก้ไข Bug
+│   ├── FINAL_SYSTEM_AUDIT_REPORT.md     #  รายงานตรวจสอบระบบ
+│   ├── SYSTEM_VERIFICATION.md           #  การตรวจสอบระบบ
+│   └── PROMT.md                         #  Prompt อธิบายระบบ
 │
 ├── 📂 templates/               # Excel Templates
-│   ├── PERFECT_TEMPLATE.xlsx            # ⭐ Template หลัก
-│   ├── TEST_TEMPLATE_FINAL.xlsx         # 🧪 Template ทดสอบ
+│   ├── PERFECT_TEMPLATE.xlsx            #  Template หลัก
+│   ├── TEST_TEMPLATE_FINAL.xlsx         #  Template ทดสอบ
 │   ├── ใบรายงานลงยอดผลิตรายวัน PD3.xlsx
 │   └── ใบลงยอดผลิตประจำวันPD3_template.xlsx
 │
@@ -41,8 +40,8 @@ PD3/
 │   ├── final_analysis.txt
 │   └── template_analysis.txt
 │
-├── 📂 assets/                  # ไฟล์รูปภาพและ Resources
-│   └── promt/                           # รูปภาพ Prompt
+├── 📂 assets/                 # ไฟล์รูปภาพและ Resources
+│   └── promt/                  # รูปภาพ Prompt
 │
 └── 📂 archive/                 # ไฟล์เก่า/ไม่ใช้งาน
     ├── test_api.html
@@ -53,7 +52,7 @@ PD3/
 
 ---
 
-## 🚀 Quick Start - วิธีการ Deploy
+## Quick Start - วิธีการ Deploy
 
 ### ขั้นตอนที่ 1: Deploy Google Apps Script
 
@@ -110,7 +109,7 @@ git push origin main
 
 ---
 
-## ✅ ตรวจสอบการทำงาน
+ ✅ ตรวจสอบการทำงาน
 
 ### ทดสอบฟอร์มบันทึกข้อมูล (pd3_production_v3.html)
 
@@ -129,13 +128,13 @@ git push origin main
 3. ใส่ Target Quantity
 4. (Optional) เลือกช่วงวันที่
 5. คลิก **คำนวณความคืบหน้า**
-6. ✅ ควรเห็น Chart, KPI Cards, และ Table
+6.  ควรเห็น Chart, KPI Cards, และ Table
 
 ---
 
-## 📋 ฟีเจอร์หลัก
+##  ฟีเจอร์หลัก
 
-### 📝 ฟอร์มบันทึกยอดผลิต (pd3_production_v3.html)
+###  ฟอร์มบันทึกยอดผลิต (pd3_production_v3.html)
 
 ✅ **ฟีเจอร์ที่มี:**
 - บันทึกยอดผลิต 2 กะ (กะ A, กะ B)
@@ -158,7 +157,7 @@ git push origin main
 - บันทึกข้อมูลลง Database Sheet (แบบยาว)
 - เปิด Sheet อัตโนมัติหลังบันทึกสำเร็จ
 
-### 📊 Dashboard (dashboard.html)
+###  Dashboard (dashboard.html)
 
 ✅ **ฟีเจอร์ที่มี:**
 - ค้นหา S/O และติดตามความคืบหน้า
@@ -171,7 +170,7 @@ git push origin main
 
 ---
 
-## 🔧 ข้อมูลเทคนิค
+##  ข้อมูลเทคนิค
 
 ### Tech Stack
 
@@ -238,96 +237,9 @@ const PT_MACHINES = [1, 2, 3, 4, 8, 9, 10];
 
 ---
 
-## 🐛 Troubleshooting
 
-### ปัญหา: ไม่สามารถบันทึกข้อมูลได้
-
-**ตรวจสอบ:**
-1. ✅ เชื่อมต่อ Internet หรือไม่?
-2. ✅ `GOOGLE_APPS_SCRIPT_URL` ถูกต้องหรือไม่?
-3. ✅ Google Apps Script Deploy แล้วหรือยัง?
-4. ✅ กรอกข้อมูลครบหรือไม่?
-
-**วิธีแก้:**
-- เปิด Developer Console (F12) ดู Error
-- ตรวจสอบ Network Tab ว่าส่ง Request สำเร็จหรือไม่
-- ลอง Deploy Apps Script ใหม่
-
-### ปัญหา: Dashboard ไม่แสดงข้อมูล
-
-**ตรวจสอบ:**
-1. ✅ มีข้อมูลใน Database Sheet หรือไม่?
-2. ✅ เลข S/O ถูกต้องหรือไม่?
-3. ✅ `GOOGLE_APPS_SCRIPT_URL` ตรงกันหรือไม่?
-
-**วิธีแก้:**
-- ตรวจสอบ Google Sheet → Database แท็บ
-- ลองค้นหา S/O อื่นที่มีข้อมูลแน่นอน
-- เปิด Console ดู Error Response
-
----
-
-## 📞 การสนับสนุน
-
-**เอกสารเพิ่มเติม:**
-- [SETUP_GUIDE.md](docs/SETUP_GUIDE.md) - คู่มือติดตั้งละเอียด
-- [DEEP_VERIFICATION_REPORT.md](docs/DEEP_VERIFICATION_REPORT.md) - รายงานการตรวจสอบระบบ
-- [CRITICAL_ISSUE_FIXED.md](docs/CRITICAL_ISSUE_FIXED.md) - ประวัติการแก้ไข Bug
-
-**ติดต่อ:**
-- GitHub Issues: สำหรับรายงานปัญหา
-- Email: zola.polysack@example.com
-
----
-
-## 📝 Changelog
-
-### v3.0 (4 กุมภาพันธ์ 2569)
-- ✅ แก้ Bug: ปุ่มบันทึกเรียก `submitData()` แทน `sendToGoogleSheets()`
-- ✅ เพิ่ม Confirmation Modal แสดงจำนวนข้อมูลก่อนบันทึก
-- ✅ เพิ่มการตรวจสอบ Internet Connection
-- ✅ ปรับปรุง Error Handling (Network, Timeout, Parse)
-- ✅ เพิ่ม Loading State และ Progress Indicator
-- ✅ จัดระเบียบโครงสร้างโปรเจค
-- ✅ Deep Verification - คะแนนความพร้อม 100/100
-
-### v2.0
-- Twin Saving (Sheet + Database)
-- Dashboard สำหรับติดตาม S/O
-- Export ข้อมูลเป็น Excel
-
-### v1.0
-- ฟอร์มบันทึกยอดผลิตพื้นฐาน
-- บันทึกลง Google Sheet
-
----
-
-## 📊 System Status
-
-| Component | Status | Score |
-|-----------|--------|-------|
-| **pd3_production_v3.html** | ✅ Ready | 100/100 |
-| **dashboard.html** | ✅ Ready | 100/100 |
-| **Code.gs** | ✅ Ready | 100/100 |
-| **Data Structure** | ✅ Verified | 100% |
-| **Error Handling** | ✅ Complete | 100% |
-| **Documentation** | ✅ Complete | 100% |
-
-**Overall System Status:** ✅ **Ready for Production (100/100)**
-
----
-
-## 🎯 Next Steps
-
-1. ⚠️ **Deploy Google Apps Script** - รอดำเนินการ
-2. ⚠️ **อัปเดท URLs** - รอ Deploy Script ก่อน
-3. ⚠️ **End-to-End Testing** - ทดสอบการทำงานจริง
-4. ⚠️ **User Training** - อบรมผู้ใช้งาน
-5. ✅ **Go Live!** - เริ่มใช้งานจริง
-
----
-
-**จัดทำโดย:** GitHub Copilot AI  
+**จัดทำโดย:** 
+-ZP1048
 **วันที่:** 4 กุมภาพันธ์ 2569  
 **Version:** 3.0  
-**Status:** ✅ Production Ready
+- Email: awiruttangwong@gmail.com
